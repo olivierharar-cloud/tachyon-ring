@@ -1,0 +1,1032 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Age of Rock - Portable</title>
+    <!-- Tailwind via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+        body {
+            font-family: 'VT323', monospace;
+        }
+
+        @keyframes blink {
+
+            0%,
+            50% {
+                opacity: 1;
+            }
+
+            51%,
+            100% {
+                opacity: 0;
+            }
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes rainbow {
+            0% {
+                filter: hue-rotate(0deg);
+            }
+
+            100% {
+                filter: hue-rotate(360deg);
+            }
+        }
+
+        .retro-title {
+            font-family: 'Press Start 2P', cursive;
+            text-shadow:
+                3px 3px 0px #ff00ff,
+                6px 6px 0px #00ffff,
+                9px 9px 0px #ffff00;
+            animation: pulse 2s infinite;
+        }
+
+        .blink {
+            animation: blink 1s infinite;
+        }
+
+        .float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .pixel-border {
+            border: 4px solid;
+            border-image: repeating-linear-gradient(45deg,
+                    #ff00ff 0px,
+                    #ff00ff 10px,
+                    #00ffff 10px,
+                    #00ffff 20px) 4;
+        }
+
+        .scanlines {
+            background: repeating-linear-gradient(0deg,
+                    rgba(0, 0, 0, 0.15),
+                    rgba(0, 0, 0, 0.15) 1px,
+                    transparent 1px,
+                    transparent 2px);
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-white overflow-hidden w-screen h-screen relative">
+
+    <!-- 90s Background -->
+    <div class="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-black z-0 pointer-events-none"></div>
+    <!-- Animated stars -->
+    <div class="absolute inset-0 z-0 pointer-events-none"
+        style="background-image: radial-gradient(2px 2px at 20% 30%, white, transparent), radial-gradient(2px 2px at 60% 70%, white, transparent), radial-gradient(1px 1px at 50% 50%, white, transparent), radial-gradient(1px 1px at 80% 10%, white, transparent), radial-gradient(2px 2px at 90% 60%, white, transparent); background-size: 200px 200px; animation: float 20s linear infinite;">
+    </div>
+    <!-- Scanlines overlay -->
+    <div class="scanlines absolute inset-0 z-10 pointer-events-none"></div>
+
+    <!-- HOME BUTTON (always visible) -->
+    <a href="home.html" id="home-btn"
+        class="absolute top-4 left-4 z-50 px-4 py-2 bg-slate-800/80 backdrop-blur border-2 border-cyan-500 rounded-lg text-cyan-400 hover:bg-cyan-500 hover:text-white transition-all duration-200 flex items-center gap-2"
+        style="font-family: 'VT323', monospace; font-size: 1.3rem;">
+        🏠 ACCUEIL
+    </a>
+
+    <!-- 90s RETRO MENU -->
+    <div id="main-menu" class="absolute inset-0 z-20 flex flex-col items-center justify-center space-y-8">
+
+        <!-- RADICAL Title -->
+        <div class="text-center space-y-6 float">
+            <div class="retro-title text-5xl md:text-7xl text-yellow-400 leading-tight">
+                AGE OF<br>ROCK
+            </div>
+            <div class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500"
+                style="font-family: 'VT323', monospace; letter-spacing: 0.3em;">
+                EST. 1989
+            </div>
+            <div class="blink text-2xl text-green-400" style="font-family: 'Press Start 2P', cursive; font-size: 1rem;">
+                ★ ARCADE EDITION ★
+            </div>
+        </div>
+
+        <!-- Mode Buttons (Grid 2x2) -->
+        <div class="grid grid-cols-2 gap-4 w-full max-w-md">
+            <button onclick="startGame(1)"
+                class="pixel-border px-6 py-5 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 transform hover:scale-105 transition-all cursor-pointer shadow-2xl">
+                <div class="text-2xl font-bold text-white"
+                    style="font-family:'Press Start 2P',cursive;text-shadow:2px 2px 0 rgba(0,0,0,.5);">1P</div>
+                <div class="text-sm text-red-100 mt-1" style="font-family:'VT323',monospace;">SOLO</div>
+            </button>
+            <button onclick="startGame(2)"
+                class="pixel-border px-6 py-5 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 transform hover:scale-105 transition-all cursor-pointer shadow-2xl">
+                <div class="text-2xl font-bold text-white"
+                    style="font-family:'Press Start 2P',cursive;text-shadow:2px 2px 0 rgba(0,0,0,.5);">2P</div>
+                <div class="text-sm text-blue-100 mt-1" style="font-family:'VT323',monospace;">CO-OP</div>
+            </button>
+            <button onclick="startGame(3)"
+                class="pixel-border px-6 py-5 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 transform hover:scale-105 transition-all cursor-pointer shadow-2xl">
+                <div class="text-2xl font-bold text-white"
+                    style="font-family:'Press Start 2P',cursive;text-shadow:2px 2px 0 rgba(0,0,0,.5);">3P</div>
+                <div class="text-sm text-green-100 mt-1" style="font-family:'VT323',monospace;">CHAOS</div>
+            </button>
+            <button onclick="startGame(4)"
+                class="pixel-border px-6 py-5 bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 transform hover:scale-105 transition-all cursor-pointer shadow-2xl">
+                <div class="text-2xl font-bold text-white"
+                    style="font-family:'Press Start 2P',cursive;text-shadow:2px 2px 0 rgba(0,0,0,.5);">4P</div>
+                <div class="text-sm text-yellow-100 mt-1" style="font-family:'VT323',monospace;">PARTY</div>
+            </button>
+        </div>
+
+        <!-- Controls Box -->
+        <div class="pixel-border p-6 bg-black/80 text-green-400 max-w-md w-full" style="font-family:'VT323',monospace;">
+            <div class="text-center text-2xl mb-4 text-yellow-400">▼ CONTROLS ▼</div>
+            <div class="space-y-2 text-lg">
+                <div class="flex justify-between items-center border-b border-green-800 pb-1">
+                    <span class="text-red-400">► P1:</span>
+                    <span class="bg-red-900/50 px-3 py-1 border border-red-600">WASD + SPACE</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-green-800 pb-1">
+                    <span class="text-blue-400">► P2:</span>
+                    <span class="bg-blue-900/50 px-3 py-1 border border-blue-600">ARROWS + ENTER</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-green-800 pb-1">
+                    <span class="text-green-400">► P3:</span>
+                    <span class="bg-green-900/50 px-3 py-1 border border-green-600">IJKL + O</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-yellow-400">► P4:</span>
+                    <span class="bg-yellow-900/50 px-3 py-1 border border-yellow-600">TFGH + Y</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fun Footer -->
+        <div class="text-center space-y-2">
+            <div class="text-xl text-yellow-300 blink" style="font-family: 'VT323', monospace;">★ INSERT COIN ★</div>
+            <div class="text-sm text-gray-400" style="font-family: 'VT323', monospace;">© 1989 BLOCK BUSTERS INC. • HIGH
+                SCORE: ∞</div>
+        </div>
+    </div>
+
+    <!-- UI Overlay: Game Over -->
+    <div id="game-over"
+        class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div
+            class="flex flex-col items-center justify-center space-y-6 bg-slate-800 p-10 rounded-2xl border border-slate-700 shadow-2xl animate-bounce-in">
+            <h2 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-500">
+                GAME OVER
+            </h2>
+            <p class="text-2xl text-slate-300 font-mono">
+                Score: <span id="final-score" class="text-white font-bold">0</span>
+            </p>
+            <button onclick="resetGame()"
+                class="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg shadow-emerald-500/20 cursor-pointer">
+                Try Again
+            </button>
+            <button onclick="backToMenu()"
+                class="px-8 py-4 bg-gradient-to-r from-slate-600 to-slate-700 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg cursor-pointer">
+                Back to Menu
+            </button>
+            <button onclick="window.location.href='home.html'"
+                class="px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-700 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg cursor-pointer">
+                🏠 Accueil
+            </button>
+        </div>
+    </div>
+
+    <!-- UI Overlay: Pause Menu -->
+    <div id="pause-menu"
+        class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/70 backdrop-blur-md">
+        <div
+            class="flex flex-col items-center justify-center space-y-6 bg-slate-800 p-10 rounded-2xl border border-slate-700 shadow-2xl">
+            <h2 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
+                PAUSE
+            </h2>
+            <div class="flex flex-col space-y-4">
+                <button onclick="resumeGame()"
+                    class="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg shadow-emerald-500/20 cursor-pointer">
+                    Resume (ESC)
+                </button>
+                <button onclick="backToMenu()"
+                    class="px-8 py-4 bg-gradient-to-r from-slate-600 to-slate-700 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg cursor-pointer">
+                    Back to Menu
+                </button>
+                <button onclick="window.location.href='home.html'"
+                    class="px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-700 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg cursor-pointer">
+                    🏠 Accueil
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- UI Overlay: HUD -->
+    <div id="hud" class="hidden absolute top-4 left-4 z-10">
+        <div class="text-white text-3xl font-bold drop-shadow-md">
+            Score: <span id="score-display">0</span>
+        </div>
+    </div>
+
+    <!-- Game Canvas -->
+    <div class="relative w-full h-full flex items-center justify-center z-10">
+        <canvas id="gameCanvas" class="hidden border-4 border-slate-700 bg-slate-800 shadow-2xl rounded-lg"></canvas>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════
+        // CONSTANTS
+        // ═══════════════════════════════════════════
+        const GRID_WIDTH = 15;
+        const GRID_HEIGHT = 25;
+        const BLOCK_SIZE = 28;
+
+        const PLAYER_THEMES = [
+            { primary: '#dc2626', light: '#fca5a5', dark: '#7f1d1d', glow: 'rgba(239,68,68,', flame: '#ef4444', engine: '#fbbf24', canopy: { mid: '#fecaca', dark: '#991b1b' } },
+            { primary: '#2563eb', light: '#93c5fd', dark: '#1e3a5f', glow: 'rgba(59,130,246,', flame: '#3b82f6', engine: '#93c5fd', canopy: { mid: '#bfdbfe', dark: '#1e40af' } },
+            { primary: '#16a34a', light: '#86efac', dark: '#14532d', glow: 'rgba(34,197,94,', flame: '#22c55e', engine: '#86efac', canopy: { mid: '#bbf7d0', dark: '#166534' } },
+            { primary: '#ca8a04', light: '#fde047', dark: '#713f12', glow: 'rgba(234,179,8,', flame: '#eab308', engine: '#fef08a', canopy: { mid: '#fef9c3', dark: '#854d0e' } }
+        ];
+
+        const DIFFICULTY_LEVELS = [
+            { minScore: 0, speed: 0.005, spawnRate: 500, color: '#22d3ee', name: 'Débutant' },
+            { minScore: 5000, speed: 0.005, spawnRate: 490, color: '#4ade80', name: 'Normal' },
+            { minScore: 12000, speed: 0.005, spawnRate: 480, color: '#a3e635', name: 'Avancé' },
+            { minScore: 22000, speed: 0.005, spawnRate: 470, color: '#fbbf24', name: 'Rapide' },
+            { minScore: 35000, speed: 0.006, spawnRate: 460, color: '#fb923c', name: 'Intense' },
+            { minScore: 50000, speed: 0.006, spawnRate: 450, color: '#f97316', name: 'Expert' },
+            { minScore: 70000, speed: 0.006, spawnRate: 440, color: '#ef4444', name: 'Furieux' },
+            { minScore: 95000, speed: 0.006, spawnRate: 430, color: '#e11d48', name: 'Légendaire' },
+            { minScore: 130000, speed: 0.007, spawnRate: 420, color: '#a855f7', name: 'Tachyon' },
+            { minScore: 180000, speed: 0.007, spawnRate: 400, color: '#d946ef', name: 'Supernova' }
+        ];
+
+        const COMBO_MULTIPLIERS = [1, 1.5, 2, 2.5, 3, 4, 5, 8, 10];
+        const POWER_UP_DURATION = 300;
+        const PU_TYPES = ['TIME_FREEZE', 'SLOW_MOTION'];
+        const PU_ICONS = { TIME_FREEZE: '❄', SLOW_MOTION: '◎' };
+        const PU_COLORS = { TIME_FREEZE: '#06b6d4', SLOW_MOTION: '#8b5cf6' };
+
+        const SHAPE_PALETTES = [
+            { fill: '#fbbf24', stroke: '#d97706', glow: 'rgba(251,191,36,0.3)' },
+            { fill: '#34d399', stroke: '#059669', glow: 'rgba(52,211,153,0.3)' },
+            { fill: '#f472b6', stroke: '#db2777', glow: 'rgba(244,114,182,0.3)' },
+            { fill: '#a78bfa', stroke: '#7c3aed', glow: 'rgba(167,139,250,0.3)' },
+            { fill: '#fb923c', stroke: '#ea580c', glow: 'rgba(251,146,60,0.3)' },
+            { fill: '#38bdf8', stroke: '#0284c7', glow: 'rgba(56,189,248,0.3)' }
+        ];
+
+        // Epic messages for huge shape clears
+        const EPIC_MESSAGES = {
+            20: [ // 20-29 blocks
+                '🔥 PAS MAL DU TOUT !',
+                '💪 GROS MOVE !',
+                '🎯 BIEN VISÉ !',
+                '⚡ C\'EST CHAUD LÀ !',
+                '🎰 LE RISQUE PAIE !',
+                '🌟 JOLI COUP !',
+            ],
+            30: [ // 30-39 blocks
+                '🤯 ENORMISSIME !!',
+                '🚀 T\'ES COMPLÈTEMENT FOU !',
+                '💎 BIJOU DE FOLIE !!',
+                '🎪 LE CIRQUE DU RISQUE !!',
+                '🏆 GROSSES CORONÈS !!',
+                '🌋 ERUPTION TOTALE !!',
+                '🦁 C\'EST QUI LE PATRON ?!',
+            ],
+            40: [ // 40-49 blocks
+                '👑 LÉGENDAIRE !!!',
+                '🌪️ OURAGAN DE TALENT !!!',
+                '💀 SUICIDE RÉUSSI !!!',
+                '🎆 FEU D\'ARTIFICE HUMAIN !!!',
+                '🏔️ SOMMET DE LA FOLIE !!!',
+                '🧨 KAMIKAZE VICTORIEUX !!!',
+                '🐉 LE DRAGON EST LÀCHÉ !!!',
+            ],
+            50: [ // 50+ blocks
+                '🌌 ABSOLUMENT DÉMENTIEL !!!!',
+                '☄️ IMPACT COSMIQUE !!!!',
+                '🤡 ON APPELLE L\'ASILE !!!!',
+                '🏴‍☠️ PIRATE DU TACHYON !!!!',
+                '🧠 CERVEAU GALAXY SIZE !!!!',
+                '💫 TROU NOIR DE TALENT !!!!',
+                '🦸 SURHUMAIN CERTIFIÉ !!!!',
+                '🎸 ROCK\'N\'ROLL SPATIAL !!!!',
+            ]
+        };
+
+        const SHAPES_TIERS = {
+            1: [ // Simple 2-3 block shapes
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }],                          // Horizontal bar
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }],                          // Small L left
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }],                          // Small L right
+            ],
+            2: [ // 4-5 block shapes
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 0, y: 1 }],                // L shape
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 2, y: 1 }],                // J shape
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 1, y: 1 }],                // T shape
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 1 }],                // S shape
+                [{ x: 1, y: 0 }, { x: 2, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }],                // Z shape
+            ],
+            3: [ // 5-6 block shapes with gaps
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 0, y: 1 }, { x: 2, y: 1 }],      // Pi / U shape
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }],      // Step L
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 1 }],      // Step R
+                [{ x: 0, y: 0 }, { x: 2, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 }],      // Inverted U
+                [{ x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 1, y: 2 }],      // Plus / Cross
+            ],
+            4: [ // 6-7 block shapes (wide / tall)
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 0, y: 1 }, { x: 3, y: 1 }],  // Gate 4-wide
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 0, y: 1 }, { x: 0, y: 2 }],            // Big L
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 2, y: 1 }, { x: 2, y: 2 }],            // Big J
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 0, y: 2 }],            // Zigzag tall
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 1, y: 2 }],            // Zigzag tall R
+            ],
+            5: [ // 7-8 block massive shapes
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 3, y: 1 }],
+                [{ x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 0, y: 2 }, { x: 2, y: 2 }],
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 1 }],
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 0, y: 1 }, { x: 2, y: 1 }, { x: 0, y: 2 }, { x: 2, y: 2 }],
+            ],
+            6: [ // Wide shapes (5-7 wide)
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 0, y: 1 }, { x: 4, y: 1 }],
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 2, y: 1 }],
+                [{ x: 0, y: 0 }, { x: 2, y: 0 }, { x: 4, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }],
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 0, y: 1 }, { x: 5, y: 1 }],
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }],
+            ],
+            7: [ // Massive shapes (6-9 wide, 2-3 tall)
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 }, { x: 0, y: 1 }, { x: 3, y: 1 }, { x: 6, y: 1 }],
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 }, { x: 7, y: 0 }],
+                [{ x: 0, y: 0 }, { x: 2, y: 0 }, { x: 4, y: 0 }, { x: 6, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 }],
+                [{ x: 3, y: 0 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }, { x: 1, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 5, y: 2 }],
+            ],
+            8: [ // Epic shapes (8-12 wide, 2-4 tall)
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 }, { x: 7, y: 0 }, { x: 8, y: 0 }, { x: 9, y: 0 }, { x: 0, y: 1 }, { x: 9, y: 1 }],
+                [{ x: 0, y: 0 }, { x: 3, y: 0 }, { x: 6, y: 0 }, { x: 9, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 }, { x: 7, y: 1 }, { x: 8, y: 1 }, { x: 9, y: 1 }],
+                [{ x: 4, y: 0 }, { x: 5, y: 0 }, { x: 3, y: 1 }, { x: 4, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 5, y: 2 }, { x: 6, y: 2 }, { x: 7, y: 2 }, { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 5, y: 3 }, { x: 6, y: 3 }, { x: 7, y: 3 }, { x: 8, y: 3 }],
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 }, { x: 7, y: 0 }, { x: 8, y: 0 }, { x: 9, y: 0 }, { x: 10, y: 0 }, { x: 11, y: 0 }, { x: 0, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 }, { x: 11, y: 1 }],
+            ]
+        };
+
+        // ═══════════════════════════════════════════
+        // CLASSES
+        // ═══════════════════════════════════════════
+        class Particle {
+            constructor(x, y, color, type = 'spark', size = 3) {
+                this.x = x; this.y = y; this.color = color; this.type = type; this.size = size;
+                this.vx = (Math.random() - 0.5) * 10; this.vy = (Math.random() - 0.5) * 10;
+                this.life = 1.0; this.decay = Math.random() * 0.03 + 0.015;
+            }
+            update() { this.x += this.vx; this.y += this.vy; this.vy += 0.15; this.vx *= 0.96; this.life -= this.decay; }
+        }
+
+        class Shape {
+            constructor(x, y, points) {
+                this.x = x; this.y = y; this.points = points; this.type = 'solid'; this.id = Math.random(); this.recalcBounds();
+            }
+            recalcBounds() {
+                if (!this.points.length) { this.width = 0; this.height = 0; return; }
+                const xs = this.points.map(p => p.x), ys = this.points.map(p => p.y);
+                this.width = Math.max(...xs) - Math.min(...xs) + 1; this.height = Math.max(...ys) - Math.min(...ys) + 1;
+            }
+            getAbsolutePoints() { const gy = Math.floor(this.y); return this.points.map(p => ({ x: this.x + p.x, y: gy + p.y })); }
+            moveDown(s) { this.y += s; }
+            addBlock(rx, ry) {
+                if (this.points.some(p => p.x === rx && p.y === ry)) return false;
+                this.points.push({ x: rx, y: ry }); this.recalcBounds(); return true;
+            }
+            isPerfectRectangle() {
+                if (this.points.length < 2) return false;
+                const minX = Math.min(...this.points.map(p => p.x));
+                const maxX = Math.max(...this.points.map(p => p.x));
+                // Check every column has blocks AND all share the same bottom Y
+                let bottomY = -Infinity;
+                for (let col = minX; col <= maxX; col++) {
+                    const colPts = this.points.filter(p => p.x === col);
+                    if (colPts.length === 0) return false; // Missing column
+                    const maxY = Math.max(...colPts.map(p => p.y));
+                    if (bottomY === -Infinity) bottomY = maxY;
+                    else if (maxY !== bottomY) return false; // Uneven bottom
+                }
+                return true;
+            }
+        }
+
+        class Player {
+            constructor(id, startX, color) {
+                this.id = id; this.x = startX; this.color = color;
+                this.glowPhase = Math.random() * Math.PI * 2; this.thrustPhase = Math.random() * Math.PI * 2; this.recoil = 0;
+            }
+            animate() { this.glowPhase += 0.06; this.thrustPhase += 0.12; if (this.recoil > 0) this.recoil = Math.max(0, this.recoil - 0.08); }
+        }
+
+        // ═══════════════════════════════════════════
+        // GAME ENGINE
+        // ═══════════════════════════════════════════
+        class GameEngine {
+            constructor() { this.reset(); }
+
+            reset(playersCount) {
+                this.mode = playersCount || 1;
+                this.players = [];
+                const step = Math.floor(GRID_WIDTH / (this.mode + 1));
+                for (let i = 0; i < this.mode; i++) {
+                    this.players.push(new Player(i + 1, step * (i + 1), PLAYER_THEMES[i].primary));
+                }
+                this.shapes = []; this.bullets = []; this.particles = [];
+                this.fallingPowerUps = []; this.activePowerUps = [];
+                this.gameOver = false; this.paused = false; this.score = 0; this.frameCount = 0;
+                // Difficulty
+                this.diffIdx = 0; this.currentDiff = DIFFICULTY_LEVELS[0];
+                this.gameSpeed = this.currentDiff.speed; this.targetSpeed = this.gameSpeed;
+                this.spawnRate = this.currentDiff.spawnRate; this.framesSinceSpawn = 0;
+                // Wave
+                this.wave = { active: false, timer: 0 };
+                // Combo
+                this.combo = { count: 0, multiplier: 1, timer: 0, displayTimer: 0, maxWindow: 150 };
+                // Stats
+                this.maxCombo = 0; this.totalRects = 0; this.shotsTotal = 0; this.shotsHit = 0;
+                // Epic message display
+                this.bigMessage = null; // { text, timer, maxTimer, area }
+            }
+
+            createRandomShape() {
+                // Tiers unlock faster: tier 5 by level 2, tier 8 by level 4
+                let maxTier = Math.min(Math.floor(this.diffIdx * 2) + 2, 8);
+                let tier = Math.floor(Math.random() * maxTier) + 1;
+                if (Math.random() < 0.3) tier = maxTier; // 30% chance for boss shapes
+                const ts = SHAPES_TIERS[tier]; const tpl = ts[Math.floor(Math.random() * ts.length)];
+                const pts = tpl.map(p => ({ ...p }));
+                const w = Math.max(...pts.map(p => p.x)) + 1;
+                const h = Math.max(...pts.map(p => p.y)) + 1;
+                return new Shape(Math.floor(Math.random() * (GRID_WIDTH - w)), -h, pts);
+            }
+
+            // Check if a new shape overlaps any existing shape
+            _shapeOverlaps(newShape) {
+                const newPts = newShape.getAbsolutePoints();
+                for (const existing of this.shapes) {
+                    const exPts = existing.getAbsolutePoints();
+                    for (const np of newPts) {
+                        for (const ep of exPts) {
+                            if (np.x === ep.x && Math.abs(np.y - ep.y) <= 1) return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            update() {
+                if (this.gameOver || this.paused) return;
+                this.frameCount++;
+                this.players.forEach(p => p.animate());
+                this._updateDifficulty();
+                this._updateWave();
+                this._updateCombo();
+                this._updateActivePowerUps();
+                const speed = this._effectiveSpeed();
+                this._spawnShapes();
+                if (!this._hasPU('TIME_FREEZE')) this._moveShapes(speed);
+                this._updateBullets();
+                this._updateFallingPU(speed);
+                this.particles.forEach(p => p.update());
+                this.particles = this.particles.filter(p => p.life > 0);
+            }
+
+            _updateDifficulty() {
+                let ni = 0;
+                for (let i = DIFFICULTY_LEVELS.length - 1; i >= 0; i--) { if (this.score >= DIFFICULTY_LEVELS[i].minScore) { ni = i; break; } }
+                // Infinite scaling beyond last defined level
+                const lastLvl = DIFFICULTY_LEVELS[DIFFICULTY_LEVELS.length - 1];
+                if (this.score >= lastLvl.minScore) {
+                    const extra = Math.floor((this.score - lastLvl.minScore) / 30000);
+                    ni = DIFFICULTY_LEVELS.length - 1 + extra;
+                }
+                if (ni !== this.diffIdx) {
+                    this.diffIdx = ni;
+                    if (ni < DIFFICULTY_LEVELS.length) {
+                        this.currentDiff = DIFFICULTY_LEVELS[ni];
+                    } else {
+                        // Infinite scaling: speed grows +0.002 per extra level, spawn shrinks -15
+                        const extra = ni - (DIFFICULTY_LEVELS.length - 1);
+                        this.currentDiff = {
+                            speed: lastLvl.speed + extra * 0.002,
+                            spawnRate: Math.max(150, lastLvl.spawnRate - extra * 15),
+                            color: '#ff00ff',
+                            name: 'Supernova +' + extra
+                        };
+                    }
+                    this.targetSpeed = this.currentDiff.speed; this.spawnRate = this.currentDiff.spawnRate;
+                    this._spawnLevelUpParticles();
+                }
+                this.gameSpeed += (this.targetSpeed - this.gameSpeed) * 0.005;
+            }
+
+            _updateWave() {
+                if (this.diffIdx < 2) { this.wave.active = false; return; }
+                this.wave.timer--;
+                if (this.wave.timer <= 0) { this.wave.active = !this.wave.active; this.wave.timer = this.wave.active ? 360 : 240; }
+            }
+
+            _effectiveSpeed() {
+                let s = this.gameSpeed;
+                if (!this.wave.active && this.wave.timer > 0) s *= 0.6;
+                if (this._hasPU('SLOW_MOTION')) s *= 0.4;
+                return s;
+            }
+
+            _updateCombo() {
+                if (this.combo.timer > 0) { this.combo.timer--; if (this.combo.timer <= 0) { this.combo.count = 0; this.combo.multiplier = 1; } }
+                if (this.combo.displayTimer > 0) this.combo.displayTimer--;
+            }
+
+            _spawnShapes() {
+                this.framesSinceSpawn++;
+                let rate = this.spawnRate;
+                if (this.wave.active) rate = Math.floor(rate * 0.8);
+                if (this.framesSinceSpawn > rate) {
+                    const candidate = this.createRandomShape();
+                    // Try up to 10 positions to avoid overlap
+                    let placed = false;
+                    for (let attempt = 0; attempt < 10; attempt++) {
+                        if (!this._shapeOverlaps(candidate)) { placed = true; break; }
+                        candidate.x = Math.floor(Math.random() * (GRID_WIDTH - candidate.width));
+                    }
+                    if (placed) this.shapes.push(candidate);
+
+                    // Stacked shapes: spawn a shape above an existing one (must clear bottom first)
+                    if (this.diffIdx >= 3 && Math.random() < 0.25 && this.shapes.length > 0) {
+                        // Pick a random existing shape that's still in the top half
+                        const targets = this.shapes.filter(s => Math.floor(s.y) > 0 && Math.floor(s.y) < GRID_HEIGHT / 2);
+                        if (targets.length > 0) {
+                            const target = targets[Math.floor(Math.random() * targets.length)];
+                            const stacked = this.createRandomShape();
+                            // Place it at the same X, just above the target
+                            stacked.x = Math.max(0, Math.min(GRID_WIDTH - stacked.width,
+                                target.x + Math.floor((target.width - stacked.width) / 2)));
+                            stacked.y = Math.floor(target.y) - stacked.height - 1;
+                            if (stacked.y < -stacked.height * 2 && !this._shapeOverlaps(stacked)) {
+                                this.shapes.push(stacked);
+                            }
+                        }
+                    }
+
+                    this.framesSinceSpawn = 0;
+                }
+            }
+
+            _moveShapes(speed) {
+                for (const s of this.shapes) {
+                    s.moveDown(speed);
+                    if (Math.max(...s.getAbsolutePoints().map(p => p.y)) >= GRID_HEIGHT - 1) this.gameOver = true;
+                }
+            }
+
+            _updateBullets() {
+                const deadB = new Set(), deadS = new Set();
+                this.bullets.forEach((b, bi) => {
+                    b.y -= 0.8;
+                    if (b.y < -5) { deadB.add(bi); return; }
+                    // Check powerup pickup
+                    for (let i = this.fallingPowerUps.length - 1; i >= 0; i--) {
+                        const pu = this.fallingPowerUps[i];
+                        if (Math.floor(b.x) === Math.floor(pu.x) && Math.abs(b.y - pu.y) < 1.2) {
+                            this._activatePU(pu.type, b.owner); this._puParticles(pu.x, pu.y, pu.type);
+                            this.fallingPowerUps.splice(i, 1); deadB.add(bi); return;
+                        }
+                    }
+                    // Check shape collision
+                    for (let si = 0; si < this.shapes.length; si++) {
+                        if (deadS.has(si)) continue;
+                        const shape = this.shapes[si];
+                        const pts = shape.getAbsolutePoints();
+                        const hit = pts.find(p => p.x === b.x && Math.floor(b.y) === p.y);
+                        if (hit) {
+                            this.shotsHit++;
+                            deadB.add(bi);
+                            this._impactParticles(b.x, hit.y, b.owner);
+                            // Add block below the hit point
+                            const relX = b.x - shape.x, relY = hit.y + 1 - Math.floor(shape.y);
+                            shape.addBlock(relX, relY);
+                            // Check if bottom is now flat → clear
+                            if (shape.isPerfectRectangle()) {
+                                this._clearShape(shape, si, deadS);
+                            }
+                            break;
+                        }
+                    }
+                });
+                this.bullets = this.bullets.filter((_, i) => !deadB.has(i));
+                this.shapes = this.shapes.filter((_, i) => !deadS.has(i));
+            }
+
+            _clearShape(shape, si, deadS) {
+                this._registerCombo(); this.totalRects++;
+                const area = shape.points.length;
+                this.score += Math.floor(area * 50 * this.combo.multiplier);
+                this._rectParticles(shape);
+                this._trySpawnPU(shape.x + shape.width / 2, Math.floor(shape.y) + shape.height / 2);
+                deadS.add(si);
+                // Epic message for big clears
+                let msgTier = 0;
+                if (area >= 50) msgTier = 50;
+                else if (area >= 40) msgTier = 40;
+                else if (area >= 30) msgTier = 30;
+                else if (area >= 20) msgTier = 20;
+                if (msgTier > 0) {
+                    const msgs = EPIC_MESSAGES[msgTier];
+                    const text = msgs[Math.floor(Math.random() * msgs.length)];
+                    const duration = 120 + msgTier * 5; // Bigger = stays longer
+                    this.bigMessage = { text, timer: duration, maxTimer: duration, area };
+                }
+            }
+
+            _registerCombo() {
+                this.combo.count++; this.combo.timer = this.combo.maxWindow; this.combo.displayTimer = 90;
+                this.combo.multiplier = COMBO_MULTIPLIERS[Math.min(this.combo.count, COMBO_MULTIPLIERS.length - 1)];
+                if (this.combo.count > this.maxCombo) this.maxCombo = this.combo.count;
+            }
+
+            _trySpawnPU(x, y) {
+                if (Math.random() < 0.2) {
+                    const type = PU_TYPES[Math.floor(Math.random() * PU_TYPES.length)];
+                    this.fallingPowerUps.push({ type, x, y, speed: 0.02 });
+                }
+            }
+
+            _updateFallingPU(speed) {
+                this.fallingPowerUps = this.fallingPowerUps.filter(pu => {
+                    pu.y += speed * 1.5;
+                    if (pu.y >= GRID_HEIGHT - 1) {
+                        for (const p of this.players) { if (p.x === Math.floor(pu.x)) { this._activatePU(pu.type, p.id); this._puParticles(pu.x, pu.y, pu.type); return false; } }
+                        if (pu.y > GRID_HEIGHT + 1) return false;
+                    }
+                    return true;
+                });
+            }
+
+            _activatePU(type, pid) {
+                this.activePowerUps = this.activePowerUps.filter(p => !(p.type === type && p.owner === pid));
+                this.activePowerUps.push({ type, remaining: POWER_UP_DURATION, owner: pid });
+            }
+            _updateActivePowerUps() { this.activePowerUps = this.activePowerUps.filter(p => { p.remaining--; return p.remaining > 0; }); }
+            _hasPU(type) { return this.activePowerUps.some(p => p.type === type); }
+            _playerHasPU(type, pid) { return this.activePowerUps.some(p => p.type === type && p.owner === pid); }
+
+            movePlayer(pid, dir) {
+                const p = this.players.find(pl => pl.id === pid); if (!p) return;
+                const nx = p.x + dir;
+                if (nx >= 0 && nx < GRID_WIDTH && !this.players.some(o => o.id !== pid && o.x === nx)) p.x = nx;
+            }
+
+            shoot(pid) {
+                const p = this.players.find(pl => pl.id === pid); if (!p) return;
+                if (this.bullets.filter(b => b.owner === pid).length >= 4) return;
+                this.shotsTotal++; p.recoil = 1.0;
+                this.bullets.push({ x: p.x, y: GRID_HEIGHT - 1, owner: pid });
+            }
+
+            // Particle spawners
+            _impactParticles(x, y, owner) {
+                const c = PLAYER_THEMES[(owner - 1) % 4].primary;
+                for (let i = 0; i < 6; i++) { const a = Math.random() * Math.PI * 2; this.particles.push(new Particle(x * BLOCK_SIZE + BLOCK_SIZE / 2 + Math.cos(a) * 5, y * BLOCK_SIZE + Math.sin(a) * 5, c, 'spark', 3)); }
+            }
+            _rectParticles(s) {
+                s.getAbsolutePoints().forEach(p => {
+                    for (let i = 0; i < 4; i++) {
+                        const a = Math.random() * Math.PI * 2;
+                        this.particles.push(new Particle(p.x * BLOCK_SIZE + BLOCK_SIZE / 2, p.y * BLOCK_SIZE + BLOCK_SIZE / 2, '#fbbf24', 'star', 5));
+                    }
+                });
+            }
+            _puParticles(x, y, type) {
+                for (let i = 0; i < 15; i++) { const a = Math.random() * Math.PI * 2; this.particles.push(new Particle(x * BLOCK_SIZE, y * BLOCK_SIZE, PU_COLORS[type], 'ring', 4)); }
+            }
+            _spawnLevelUpParticles() {
+                for (let i = 0; i < 30; i++) { const p = new Particle(Math.random() * GRID_WIDTH * BLOCK_SIZE + panelWidth, GRID_HEIGHT * BLOCK_SIZE, this.currentDiff.color, 'star', 4); p.vy = -Math.random() * 8 - 3; p.vx = (Math.random() - 0.5) * 3; this.particles.push(p); }
+            }
+        }
+
+        // ═══════════════════════════════════════════
+        // RENDERER + GAME LOOP
+        // ═══════════════════════════════════════════
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const engine = new GameEngine();
+        let animationId;
+        const panelWidth = 60;
+        canvas.width = GRID_WIDTH * BLOCK_SIZE + panelWidth * 2;
+        canvas.height = GRID_HEIGHT * BLOCK_SIZE;
+
+        function render() {
+            const CW = canvas.width, CH = canvas.height;
+            ctx.fillStyle = '#1e293b'; ctx.fillRect(0, 0, CW, CH);
+
+            // Side panels
+            let gr = ctx.createLinearGradient(0, 0, panelWidth, 0);
+            gr.addColorStop(0, '#0f172a'); gr.addColorStop(1, '#1e293b');
+            ctx.fillStyle = gr; ctx.fillRect(0, 0, panelWidth, CH);
+            gr = ctx.createLinearGradient(CW - panelWidth, 0, CW, 0);
+            gr.addColorStop(0, '#1e293b'); gr.addColorStop(1, '#0f172a');
+            ctx.fillStyle = gr; ctx.fillRect(CW - panelWidth, 0, panelWidth, CH);
+            ctx.strokeStyle = '#334155'; ctx.lineWidth = 2;
+            for (let y = 50; y < CH; y += 100) { ctx.beginPath(); ctx.moveTo(10, y); ctx.lineTo(50, y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(CW - 50, y); ctx.lineTo(CW - 10, y); ctx.stroke(); }
+
+            ctx.save(); ctx.translate(panelWidth, 0);
+            const GW = GRID_WIDTH * BLOCK_SIZE, GH = GRID_HEIGHT * BLOCK_SIZE;
+
+            // Grid
+            ctx.strokeStyle = 'rgba(51,65,85,0.4)'; ctx.lineWidth = 1; ctx.beginPath();
+            for (let x = 0; x <= GRID_WIDTH; x++) { ctx.moveTo(x * BLOCK_SIZE, 0); ctx.lineTo(x * BLOCK_SIZE, GH); }
+            for (let y = 0; y <= GRID_HEIGHT; y++) { ctx.moveTo(0, y * BLOCK_SIZE); ctx.lineTo(GW, y * BLOCK_SIZE); }
+            ctx.stroke();
+
+            // Danger zone
+            const danger = engine.shapes.some(s => Math.max(...s.getAbsolutePoints().map(p => p.y)) >= GRID_HEIGHT - 4);
+            if (danger) { const dg = ctx.createLinearGradient(0, (GRID_HEIGHT - 4) * BLOCK_SIZE, 0, GH); dg.addColorStop(0, 'rgba(239,68,68,0)'); dg.addColorStop(1, `rgba(239,68,68,${0.15 + Math.sin(Date.now() * 0.008) * 0.1})`); ctx.fillStyle = dg; ctx.fillRect(0, (GRID_HEIGHT - 4) * BLOCK_SIZE, GW, 4 * BLOCK_SIZE); }
+
+            // Shapes
+            ctx.shadowBlur = 12; ctx.shadowColor = 'rgba(251,191,36,0.4)';
+            engine.shapes.forEach(shape => {
+                const pts = shape.getAbsolutePoints();
+                const pal = SHAPE_PALETTES[Math.floor(shape.id * 100) % SHAPE_PALETTES.length];
+                // Glow
+                ctx.fillStyle = pal.glow;
+                pts.forEach(p => ctx.fillRect(p.x * BLOCK_SIZE - 2, p.y * BLOCK_SIZE - 2, BLOCK_SIZE + 4, BLOCK_SIZE + 4));
+                // Outline
+                ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.beginPath();
+                pts.forEach(p => ctx.rect(p.x * BLOCK_SIZE, p.y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE));
+                ctx.stroke();
+                // Fill
+                pts.forEach(p => {
+                    const x = p.x * BLOCK_SIZE, y = p.y * BLOCK_SIZE;
+                    const g = ctx.createLinearGradient(x, y, x + BLOCK_SIZE, y + BLOCK_SIZE);
+                    g.addColorStop(0, pal.fill); g.addColorStop(1, pal.stroke);
+                    ctx.fillStyle = g; ctx.fillRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
+                    ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fillRect(x + 2, y + 2, BLOCK_SIZE - 4, 4); ctx.fillRect(x + 2, y + 2, 4, BLOCK_SIZE - 4);
+                    ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.fillRect(x + 2, y + BLOCK_SIZE - 5, BLOCK_SIZE - 4, 3); ctx.fillRect(x + BLOCK_SIZE - 5, y + 2, 3, BLOCK_SIZE - 4);
+                });
+            });
+            ctx.shadowBlur = 0;
+
+            // Falling Power-ups
+            engine.fallingPowerUps.forEach(pu => {
+                const px = pu.x * BLOCK_SIZE + BLOCK_SIZE / 2, py = pu.y * BLOCK_SIZE + BLOCK_SIZE / 2 + Math.sin(Date.now() * 0.005) * 4;
+                ctx.fillStyle = PU_COLORS[pu.type]; ctx.beginPath();
+                ctx.moveTo(px, py - 10); ctx.lineTo(px + 10, py); ctx.lineTo(px, py + 10); ctx.lineTo(px - 10, py); ctx.fill();
+                ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.font = 'bold 12px sans-serif'; ctx.fillText(PU_ICONS[pu.type], px, py + 4);
+            });
+
+            // Particles
+            engine.particles.forEach(p => {
+                ctx.globalAlpha = Math.max(0, p.life);
+                if (p.type === 'ring') { ctx.strokeStyle = p.color; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(p.x, p.y, p.size * (1 - p.life) * 3, 0, Math.PI * 2); ctx.stroke(); }
+                else if (p.type === 'star') { ctx.fillStyle = p.color; ctx.beginPath(); ctx.arc(p.x, p.y, p.size * p.life, 0, Math.PI * 2); ctx.fill(); }
+                else { ctx.fillStyle = p.color; ctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size); }
+                ctx.globalAlpha = 1;
+            });
+
+            // Bullets
+            engine.bullets.forEach(b => {
+                const th = PLAYER_THEMES[(b.owner - 1) % 4];
+                ctx.fillStyle = th.primary; ctx.shadowColor = th.glow + '0.6)'; ctx.shadowBlur = 8;
+                ctx.beginPath(); ctx.arc(b.x * BLOCK_SIZE + BLOCK_SIZE / 2, b.y * BLOCK_SIZE + BLOCK_SIZE / 2, BLOCK_SIZE * 0.22, 0, Math.PI * 2); ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+
+            // Aiming guides
+            engine.players.forEach(p => {
+                ctx.strokeStyle = p.color; ctx.globalAlpha = 0.2; ctx.lineWidth = 1; ctx.setLineDash([4, 6]); ctx.beginPath();
+                const cx = p.x * BLOCK_SIZE + BLOCK_SIZE / 2; ctx.moveTo(cx, (GRID_HEIGHT - 1) * BLOCK_SIZE); ctx.lineTo(cx, 0); ctx.stroke();
+                ctx.setLineDash([]); ctx.globalAlpha = 1;
+            });
+
+            // Ships (hexagonal hull)
+            engine.players.forEach(p => {
+                const th = PLAYER_THEMES[(p.id - 1) % 4];
+                const cx = p.x * BLOCK_SIZE + BLOCK_SIZE / 2;
+                const cy = (GRID_HEIGHT - 1) * BLOCK_SIZE + BLOCK_SIZE / 2;
+                const recoilOff = p.recoil * 4;
+                ctx.save(); ctx.translate(cx, cy + recoilOff);
+                // Glow halo
+                const ga = 0.25 + Math.sin(p.glowPhase) * 0.15;
+                ctx.fillStyle = th.glow + ga + ')'; ctx.beginPath(); ctx.arc(0, 0, BLOCK_SIZE * 0.7, 0, Math.PI * 2); ctx.fill();
+                // Thruster flames
+                const fl = 6 + Math.sin(p.thrustPhase) * 3;
+                ctx.fillStyle = th.engine; ctx.globalAlpha = 0.7;
+                ctx.fillRect(-4, 8, 3, fl); ctx.fillRect(1, 8, 3, fl);
+                ctx.fillStyle = th.flame; ctx.globalAlpha = 0.5;
+                ctx.fillRect(-3, 10, 2, fl * 0.7); ctx.fillRect(1, 10, 2, fl * 0.7);
+                ctx.globalAlpha = 1;
+                // Hull
+                ctx.beginPath(); ctx.moveTo(0, -13); ctx.lineTo(10, 0); ctx.lineTo(10, 6); ctx.lineTo(6, 10); ctx.lineTo(-6, 10); ctx.lineTo(-10, 6); ctx.lineTo(-10, 0); ctx.closePath();
+                const hg = ctx.createLinearGradient(-10, -13, 10, 10);
+                hg.addColorStop(0, th.light); hg.addColorStop(0.5, th.primary); hg.addColorStop(1, th.dark);
+                ctx.fillStyle = hg; ctx.fill();
+                ctx.strokeStyle = th.light; ctx.lineWidth = 1; ctx.stroke();
+                // Cockpit
+                ctx.beginPath(); ctx.moveTo(0, -7); ctx.lineTo(4, 0); ctx.lineTo(0, 4); ctx.lineTo(-4, 0); ctx.closePath();
+                const cg = ctx.createLinearGradient(0, -7, 0, 4);
+                cg.addColorStop(0, 'rgba(255,255,255,0.8)'); cg.addColorStop(0.5, th.canopy.mid); cg.addColorStop(1, th.canopy.dark);
+                ctx.fillStyle = cg; ctx.fill();
+                // Wing accents
+                ctx.strokeStyle = th.light; ctx.lineWidth = 1; ctx.globalAlpha = 0.6;
+                ctx.beginPath(); ctx.moveTo(-8, 2); ctx.lineTo(-5, 7); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(8, 2); ctx.lineTo(5, 7); ctx.stroke();
+                ctx.globalAlpha = 1;
+                // Engine dots
+                ctx.fillStyle = th.engine; ctx.beginPath(); ctx.arc(-4, 9, 1.5, 0, Math.PI * 2); ctx.fill();
+                ctx.beginPath(); ctx.arc(4, 9, 1.5, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
+            });
+
+            ctx.restore(); // End panel offset
+
+            // ── HUD ──
+            drawHUD();
+        }
+
+        function drawHUD() {
+            const CW = canvas.width;
+            ctx.textAlign = 'left'; ctx.font = 'bold 20px VT323, monospace';
+            ctx.fillStyle = '#fff'; ctx.fillText(`Score: ${engine.score}`, panelWidth + 8, 24);
+
+            // Difficulty badge
+            const diff = engine.currentDiff;
+            ctx.textAlign = 'right'; ctx.fillStyle = diff.color;
+            ctx.fillText(`◈ ${diff.name.toUpperCase()}`, CW - panelWidth - 8, 24);
+
+            // Progress bar to next tier
+            const nextDiff = DIFFICULTY_LEVELS[engine.diffIdx + 1];
+            if (nextDiff) {
+                const prog = (engine.score - diff.minScore) / (nextDiff.minScore - diff.minScore);
+                const bx = CW - panelWidth - 120, by = 30, bw = 112, bh = 6;
+                ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fillRect(bx, by, bw, bh);
+                ctx.fillStyle = diff.color; ctx.fillRect(bx, by, bw * Math.min(1, prog), bh);
+            }
+
+            // Wave indicator
+            if (engine.diffIdx >= 2) {
+                ctx.textAlign = 'right'; ctx.font = '14px VT323, monospace';
+                ctx.fillStyle = engine.wave.active ? '#ef4444' : '#94a3b8';
+                ctx.fillText(engine.wave.active ? '⚠ VAGUE INTENSE' : '☁ Accalmie', CW - panelWidth - 8, 50);
+            }
+
+            // Combo display
+            if (engine.combo.displayTimer > 0 && engine.combo.count > 1) {
+                ctx.textAlign = 'center';
+                const sz = 24 + engine.combo.count * 3;
+                ctx.font = `900 ${sz}px VT323, monospace`;
+                ctx.fillStyle = engine.combo.count >= 4 ? `hsl(${Date.now() / 5 % 360},100%,65%)` : '#fbbf24';
+                ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 10;
+                const cx = canvas.width / 2, cy = canvas.height / 2 - 20;
+                ctx.fillText(`x${engine.combo.multiplier}`, cx, cy);
+                if (engine.combo.count >= 3) { ctx.font = '16px VT323'; ctx.fillStyle = '#fff'; ctx.fillText(engine.combo.count >= 5 ? '⭐ PARFAIT!' : '🔥 INCROYABLE!', cx, cy + 25); }
+                ctx.restore();
+            }
+
+            // Epic big message
+            if (engine.bigMessage && engine.bigMessage.timer > 0) {
+                engine.bigMessage.timer--;
+                const msg = engine.bigMessage;
+                const progress = msg.timer / msg.maxTimer;
+                const alpha = progress > 0.8 ? (1 - progress) / 0.2 : (progress < 0.2 ? progress / 0.2 : 1);
+                const scale = 1 + (1 - progress) * 0.3;
+                const cx = canvas.width / 2;
+                const cy = canvas.height / 2 + 40;
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                ctx.translate(cx, cy);
+                ctx.scale(scale, scale);
+                ctx.shadowColor = 'rgba(0,0,0,0.9)';
+                ctx.shadowBlur = 20;
+                if (msg.area >= 16) {
+                    ctx.fillStyle = `hsl(${Date.now() / 3 % 360},100%,65%)`;
+                } else if (msg.area >= 12) {
+                    ctx.fillStyle = '#ff6b6b';
+                } else {
+                    ctx.fillStyle = '#fbbf24';
+                }
+                const fontSize = Math.min(36 + msg.area * 1.5, 60);
+                ctx.font = `900 ${fontSize}px VT323, monospace`;
+                ctx.textAlign = 'center';
+                ctx.fillText(msg.text, 0, 0);
+                if (msg.area >= 12) {
+                    ctx.font = '18px VT323, monospace';
+                    ctx.fillStyle = '#fff';
+                    ctx.fillText(`${msg.area} BLOCS D'UN COUP !`, 0, 30);
+                }
+                ctx.restore();
+                if (msg.timer <= 0) engine.bigMessage = null;
+            }
+
+            // Active power-ups
+            let py = 50;
+            ctx.textAlign = 'left'; ctx.font = '14px VT323, monospace';
+            engine.activePowerUps.forEach(apu => {
+                const c = PU_COLORS[apu.type]; const icon = PU_ICONS[apu.type];
+                const secs = (apu.remaining / 60).toFixed(1);
+                ctx.fillStyle = c; ctx.fillText(`[P${apu.owner}] ${icon} ${secs}s`, panelWidth + 8, py);
+                // Mini bar
+                const ratio = apu.remaining / POWER_UP_DURATION;
+                ctx.fillStyle = 'rgba(255,255,255,0.1)'; ctx.fillRect(panelWidth + 8, py + 3, 60, 3);
+                ctx.fillStyle = c; ctx.fillRect(panelWidth + 8, py + 3, 60 * ratio, 3);
+                py += 22;
+            });
+
+            // Score display in HUD div
+            document.getElementById('score-display').innerText = `Lvl ${engine.diffIdx + 1} • ${engine.score}`;
+        }
+
+        // ═══════════════════════════════════════════
+        // GAME LIFECYCLE
+        // ═══════════════════════════════════════════
+        function gameLoop() {
+            if (engine.gameOver) { showGameOver(); return; }
+            engine.update(); render();
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        function startGame(mode) {
+            document.getElementById('main-menu').classList.add('hidden');
+            document.getElementById('game-over').classList.add('hidden');
+            document.getElementById('hud').classList.remove('hidden');
+            document.getElementById('gameCanvas').classList.remove('hidden');
+            engine.reset(mode);
+            if (animationId) cancelAnimationFrame(animationId);
+            gameLoop();
+        }
+
+        function resetGame() { startGame(engine.mode); }
+
+        function showGameOver() {
+            const acc = engine.shotsTotal > 0 ? Math.round(engine.shotsHit / engine.shotsTotal * 100) : 0;
+            document.getElementById('game-over').classList.remove('hidden');
+            document.getElementById('final-score').innerText =
+                `${engine.score} | ◼${engine.totalRects} | x${engine.maxCombo} | ${acc}%`;
+        }
+
+        function togglePause() {
+            if (engine.gameOver) return;
+            engine.paused = !engine.paused;
+            document.getElementById('pause-menu').classList[engine.paused ? 'remove' : 'add']('hidden');
+        }
+        function resumeGame() { engine.paused = false; document.getElementById('pause-menu').classList.add('hidden'); }
+        function backToMenu() {
+            if (animationId) cancelAnimationFrame(animationId);
+            engine.paused = false;
+            ['pause-menu', 'gameCanvas', 'hud', 'game-over'].forEach(id => document.getElementById(id).classList.add('hidden'));
+            document.getElementById('main-menu').classList.remove('hidden');
+        }
+
+        // ═══════════════════════════════════════════
+        // INPUT (4 PLAYERS)
+        // ═══════════════════════════════════════════
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Escape') { togglePause(); return; }
+            if (engine.gameOver || engine.paused) return;
+            const actions = {
+                // P1: WASD + Space
+                'KeyA': [1, -1], 'KeyD': [1, 1], 'Space': [1, 'shoot'],
+                // P2: Arrows + Enter
+                'ArrowLeft': [2, -1], 'ArrowRight': [2, 1], 'Enter': [2, 'shoot'],
+                // P3: IJKL + O
+                'KeyJ': [3, -1], 'KeyL': [3, 1], 'KeyO': [3, 'shoot'],
+                // P4: TFGH + Y
+                'KeyF': [4, -1], 'KeyH': [4, 1], 'KeyY': [4, 'shoot']
+            };
+            const act = actions[e.code];
+            if (act) {
+                e.preventDefault();
+                if (act[1] === 'shoot') engine.shoot(act[0]);
+                else engine.movePlayer(act[0], act[1]);
+            }
+        });
+    </script>
+</body>
+
+</html>

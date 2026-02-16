@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Positions des Joueurs - Tachyon Ring</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        .retro-title {
+            font-family: 'Press Start 2P', cursive;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(15, 1fr);
+            grid-template-rows: repeat(25, 1fr);
+            gap: 1px;
+            background: #1e293b;
+            border: 4px solid #475569;
+            width: 100%;
+            max-width: 600px;
+            aspect-ratio: 15/25;
+        }
+
+        .grid-cell {
+            background: #0f172a;
+            border: 0.5px solid #334155;
+        }
+
+        .player {
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-bottom: 20px solid currentColor;
+            margin: auto;
+            filter: drop-shadow(0 0 8px currentColor);
+        }
+
+        .aiming-line {
+            position: absolute;
+            width: 2px;
+            height: 100%;
+            top: 0;
+            opacity: 0.3;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 min-h-screen text-white p-8">
+
+    <div class="max-w-6xl mx-auto">
+        <h1 class="retro-title text-3xl text-center mb-8 text-yellow-400">
+            Positions des Joueurs
+        </h1>
+
+        <!-- Grille 4 joueurs -->
+        <div class="bg-slate-800/80 backdrop-blur-md rounded-2xl p-8 mb-8 border border-slate-700">
+            <h2 class="text-2xl mb-6 text-cyan-400 text-center">🎮 Configuration à 4 Joueurs</h2>
+
+            <div class="relative mx-auto mb-6" style="max-width: 600px;">
+                <div class="grid-container relative">
+                    <!-- Generate grid cells -->
+                    <script>
+                        for (let i = 0; i < 375; i++) {
+                            document.write('<div class="grid-cell"></div>');
+                        }
+                    </script>
+
+                    <!-- Players at bottom -->
+                    <div style="position: absolute; bottom: 8px; left: 10%; transform: translateX(-50%);">
+                        <div class="player" style="color: #fb7185;"></div>
+                        <div class="text-xs text-center mt-1 text-rose-400 font-bold">P1</div>
+                    </div>
+
+                    <div style="position: absolute; bottom: 8px; left: 30%; transform: translateX(-50%);">
+                        <div class="player" style="color: #60a5fa;"></div>
+                        <div class="text-xs text-center mt-1 text-blue-400 font-bold">P2</div>
+                    </div>
+
+                    <div style="position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);">
+                        <div class="player" style="color: #34d399;"></div>
+                        <div class="text-xs text-center mt-1 text-emerald-400 font-bold">P3</div>
+                    </div>
+
+                    <div style="position: absolute; bottom: 8px; left: 70%; transform: translateX(-50%);">
+                        <div class="player" style="color: #f59e0b;"></div>
+                        <div class="text-xs text-center mt-1 text-amber-500 font-bold">P4</div>
+                    </div>
+
+                    <!-- Aiming lines -->
+                    <div class="aiming-line" style="left: 10%; background: #fb7185;"></div>
+                    <div class="aiming-line" style="left: 30%; background: #60a5fa;"></div>
+                    <div class="aiming-line" style="left: 50%; background: #34d399;"></div>
+                    <div class="aiming-line" style="left: 70%; background: #f59e0b;"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-rose-500/20 border border-rose-500 rounded-lg p-4">
+                    <div class="text-rose-400 font-bold mb-2">🔴 Joueur 1</div>
+                    <div class="text-sm">Position: 20%</div>
+                    <div class="text-xs text-gray-400">Column: 3/15</div>
+                </div>
+
+                <div class="bg-blue-500/20 border border-blue-500 rounded-lg p-4">
+                    <div class="text-blue-400 font-bold mb-2">🔵 Joueur 2</div>
+                    <div class="text-sm">Position: 40%</div>
+                    <div class="text-xs text-gray-400">Column: 6/15</div>
+                </div>
+
+                <div class="bg-emerald-500/20 border border-emerald-500 rounded-lg p-4">
+                    <div class="text-emerald-400 font-bold mb-2">🟢 Joueur 3</div>
+                    <div class="text-sm">Position: 60%</div>
+                    <div class="text-xs text-gray-400">Column: 9/15</div>
+                </div>
+
+                <div class="bg-amber-500/20 border border-amber-500 rounded-lg p-4">
+                    <div class="text-amber-400 font-bold mb-2">🟠 Joueur 4</div>
+                    <div class="text-sm">Position: 80%</div>
+                    <div class="text-xs text-gray-400">Column: 12/15</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Grille 3 joueurs -->
+        <div class="grid md:grid-cols-2 gap-6 mb-8">
+            <div class="bg-slate-800/80 backdrop-blur-md rounded-2xl p-6 border border-slate-700">
+                <h3 class="text-xl mb-4 text-cyan-400 text-center">👥 3 Joueurs</h3>
+                <div class="relative mx-auto"
+                    style="max-width: 400px; height: 150px; background: #1e293b; border: 3px solid #475569; border-radius: 8px;">
+                    <div style="position: absolute; bottom: 10px; left: 25%; transform: translateX(-50%);">
+                        <div class="player" style="color: #fb7185; transform: scale(0.8);"></div>
+                    </div>
+                    <div style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);">
+                        <div class="player" style="color: #60a5fa; transform: scale(0.8);"></div>
+                    </div>
+                    <div style="position: absolute; bottom: 10px; left: 75%; transform: translateX(-50%);">
+                        <div class="player" style="color: #34d399; transform: scale(0.8);"></div>
+                    </div>
+
+                    <div class="aiming-line" style="left: 25%; background: #fb7185;"></div>
+                    <div class="aiming-line" style="left: 50%; background: #60a5fa;"></div>
+                    <div class="aiming-line" style="left: 75%; background: #34d399;"></div>
+                </div>
+                <div class="text-center mt-3 text-sm text-gray-400">
+                    Positions: 25%, 50%, 75%
+                </div>
+            </div>
+
+            <div class="bg-slate-800/80 backdrop-blur-md rounded-2xl p-6 border border-slate-700">
+                <h3 class="text-xl mb-4 text-cyan-400 text-center">👤👤 2 Joueurs</h3>
+                <div class="relative mx-auto"
+                    style="max-width: 400px; height: 150px; background: #1e293b; border: 3px solid #475569; border-radius: 8px;">
+                    <div style="position: absolute; bottom: 10px; left: 33%; transform: translateX(-50%);">
+                        <div class="player" style="color: #fb7185; transform: scale(0.8);"></div>
+                    </div>
+                    <div style="position: absolute; bottom: 10px; left: 67%; transform: translateX(-50%);">
+                        <div class="player" style="color: #60a5fa; transform: scale(0.8);"></div>
+                    </div>
+
+                    <div class="aiming-line" style="left: 33%; background: #fb7185;"></div>
+                    <div class="aiming-line" style="left: 67%; background: #60a5fa;"></div>
+                </div>
+                <div class="text-center mt-3 text-sm text-gray-400">
+                    Positions: 33%, 67%
+                </div>
+            </div>
+        </div>
+
+        <!-- Formule de calcul -->
+        <div
+            class="bg-gradient-to-r from-purple-800/50 to-blue-800/50 backdrop-blur-md rounded-2xl p-8 border border-purple-500">
+            <h2 class="text-2xl mb-4 text-purple-300 text-center">📐 Formule de Répartition</h2>
+
+            <div class="bg-black/40 p-6 rounded-lg font-mono text-center mb-4">
+                <div class="text-xl text-cyan-400 mb-2">Position(i) = (GRID_WIDTH / (numPlayers + 1)) × (i + 1)</div>
+                <div class="text-sm text-gray-400">où i ∈ [0, numPlayers-1]</div>
+            </div>
+
+            <div class="space-y-3 text-gray-300">
+                <div>
+                    <strong class="text-yellow-300">Exemple pour 4 joueurs :</strong>
+                    <div class="ml-4 mt-1 space-y-1">
+                        <div>• Joueur 0: (15 / 5) × 1 = 3</div>
+                        <div>• Joueur 1: (15 / 5) × 2 = 6</div>
+                        <div>• Joueur 2: (15 / 5) × 3 = 9</div>
+                        <div>• Joueur 3: (15 / 5) × 4 = 12</div>
+                    </div>
+                </div>
+
+                <div class="pt-3 border-t border-purple-500/30">
+                    <strong class="text-yellow-300">Avantages :</strong>
+                    <div class="ml-4 mt-1 space-y-1">
+                        <div>✅ Répartition équitable automatique</div>
+                        <div>✅ Marges égales de chaque côté</div>
+                        <div>✅ Adaptation dynamique au nombre de joueurs</div>
+                        <div>✅ Évite les collisions entre joueurs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <a href="multiplayer.html"
+                class="inline-block px-8 py-4 bg-gradient-to-r from-green-600 to-emerald-500 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg">
+                🚀 Tester le Jeu
+            </a>
+        </div>
+    </div>
+
+</body>
+
+</html>

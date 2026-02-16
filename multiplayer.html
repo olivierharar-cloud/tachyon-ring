@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tachyon Ring - 4 Player Online Battle</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/peerjs@1.5.0/dist/peerjs.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+        body {
+            font-family: 'VT323', monospace;
+        }
+
+        @keyframes blink {
+
+            0%,
+            50% {
+                opacity: 1;
+            }
+
+            51%,
+            100% {
+                opacity: 0;
+            }
+        }
+
+        .blink {
+            animation: blink 1s infinite;
+        }
+
+        .retro-title {
+            font-family: 'Press Start 2P', cursive;
+            text-shadow:
+                3px 3px 0px #ff00ff,
+                6px 6px 0px #00ffff,
+                9px 9px 0px #ffff00;
+        }
+    </style>
+</head>
+
+<body class="bg-slate-900 text-white overflow-hidden w-screen h-screen relative">
+
+    <!-- Background -->
+    <div class="absolute inset-0 bg-gradient-to-br from-purple-900 via-blue-900 to-black z-0"></div>
+
+    <!-- HOME BUTTON (always visible on lobby) -->
+    <a href="home.html"
+        class="absolute top-4 left-4 z-50 px-4 py-2 bg-slate-800/80 backdrop-blur border-2 border-cyan-500 rounded-lg text-cyan-400 hover:bg-cyan-500 hover:text-white transition-all duration-200 flex items-center gap-2"
+        style="font-family: 'VT323', monospace; font-size: 1.3rem;">
+        🏠 ACCUEIL
+    </a>
+
+    <!-- LOBBY SCREEN -->
+    <div id="lobby-screen" class="absolute inset-0 z-20 flex flex-col items-center justify-center space-y-8">
+
+        <div class="retro-title text-5xl text-yellow-400">TACHYON RING</div>
+        <div class="text-2xl text-cyan-400" style="font-family: 'Press Start 2P', cursive;">4 PLAYER BATTLE</div>
+
+        <!-- Connection Status -->
+        <div id="connection-status" class="text-center">
+            <div class="blink text-green-400 text-xl">● CONNECTING...</div>
+        </div>
+
+        <!-- Lobby Options -->
+        <div id="lobby-options" class="hidden space-y-6 w-full max-w-md">
+            <!-- Player Name Input -->
+            <div class="p-4 bg-black/80 border-4 border-cyan-500">
+                <label class="block text-cyan-400 text-xl mb-2">ENTER NAME:</label>
+                <input id="player-name" type="text" maxlength="12" value="Player"
+                    class="w-full p-3 bg-slate-800 border-2 border-green-500 text-white text-2xl"
+                    style="font-family: 'Press Start 2P', cursive;">
+            </div>
+
+            <!-- Host Game -->
+            <button id="host-btn"
+                class="w-full p-6 bg-gradient-to-r from-green-600 to-emerald-500 border-4 border-green-400 text-white text-3xl hover:scale-105 transition-transform"
+                style="font-family: 'Press Start 2P', cursive;">
+                HOST GAME
+            </button>
+
+            <!-- Join Game -->
+            <div class="space-y-2">
+                <input id="room-id-input" type="text" placeholder="ENTER ROOM ID"
+                    class="w-full p-3 bg-slate-800 border-2 border-pink-500 text-white text-xl text-center"
+                    style="font-family: 'VT323', monospace;">
+                <button id="join-btn"
+                    class="w-full p-6 bg-gradient-to-r from-pink-600 to-purple-500 border-4 border-pink-400 text-white text-3xl hover:scale-105 transition-transform"
+                    style="font-family: 'Press Start 2P', cursive;">
+                    JOIN GAME
+                </button>
+            </div>
+        </div>
+
+        <!-- Waiting Room -->
+        <div id="waiting-room" class="hidden space-y-6 w-full max-w-md">
+            <div class="p-6 bg-black/80 border-4 border-yellow-400">
+                <div class="text-center text-2xl text-yellow-400 mb-4">ROOM ID:</div>
+                <div id="room-id-display" class="text-center text-3xl text-white mb-4"
+                    style="font-family: 'Press Start 2P', cursive;">----</div>
+                <div class="text-center text-sm text-gray-400">Share this ID with your friend!</div>
+            </div>
+
+            <div class="p-6 bg-black/80 border-4 border-cyan-400">
+                <div class="text-center text-xl text-cyan-400 mb-4">PLAYERS:</div>
+                <div id="player-list" class="space-y-2 text-white text-xl"></div>
+            </div>
+
+            <button id="start-game-btn"
+                class="hidden w-full p-6 bg-gradient-to-r from-green-600 to-emerald-500 border-4 border-green-400 text-white text-3xl"
+                style="font-family: 'Press Start 2P', cursive;">
+                START!
+            </button>
+
+            <div id="waiting-message" class="blink text-center text-yellow-300 text-xl">WAITING FOR PLAYERS (MAX 4)...
+            </div>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN (Hidden initially) -->
+    <div id="game-screen" class="hidden absolute inset-0 z-20">
+        <div class="absolute top-4 left-4 z-10 text-white text-3xl font-bold">
+            Score: <span id="score-display">0</span>
+        </div>
+        <div class="relative w-full h-full flex items-center justify-center">
+            <canvas id="gameCanvas" class="border-4 border-slate-700 bg-slate-800 shadow-2xl rounded-lg"
+                style="max-width: 95vw; max-height: 95vh;"></canvas>
+        </div>
+    </div>
+
+    <!-- PAUSE MENU -->
+    <div id="pause-menu"
+        class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/70 backdrop-blur-md">
+        <div
+            class="flex flex-col items-center justify-center space-y-6 bg-slate-800 p-10 rounded-2xl border border-slate-700 shadow-2xl">
+            <h2 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400"
+                style="font-family: 'Press Start 2P', cursive;">
+                PAUSED
+            </h2>
+            <div class="flex flex-col space-y-4">
+                <button onclick="resumeGame()"
+                    class="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg shadow-emerald-500/20 cursor-pointer">
+                    Resume (ESC)
+                </button>
+                <button onclick="backToLobby()"
+                    class="px-8 py-4 bg-gradient-to-r from-slate-600 to-slate-700 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg cursor-pointer">
+                    Back to Lobby
+                </button>
+                <button onclick="window.location.href='home.html'"
+                    class="px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-700 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg cursor-pointer">
+                    🏠 Accueil
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === CONSTANTS ===
+        const GRID_WIDTH = 15;
+        const GRID_HEIGHT = 25;
+        const BLOCK_SIZE = 28;
+
+        // === SHAPES ===
+        const SHAPES_TIERS = {
+            1: [
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }],
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }],
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }],
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }],
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 1, y: 1 }],
+            ],
+            2: [
+                [{ x: 0, y: 0 }, { x: 0, y: 1 }, { x: 0, y: 2 }],
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }],
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 1 }],
+            ]
+        };
+
+        // === CLASSES ===
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.vx = (Math.random() - 0.5) * 10;
+                this.vy = (Math.random() - 0.5) * 10;
+                this.life = 1.0;
+                this.decay = Math.random() * 0.03 + 0.01;
+            }
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+                this.life -= this.decay;
+            }
+        }
+
+        class Shape {
+            constructor(x, y, points) {
+                this.x = x;
+                this.y = y;
+                this.points = points;
+                this.id = Math.random();
+                this.recalcBounds();
+            }
+
+            recalcBounds() {
+                if (this.points.length === 0) {
+                    this.width = 0; this.height = 0; return;
+                }
+                const xs = this.points.map(p => p.x);
+                const ys = this.points.map(p => p.y);
+                this.width = Math.max(...xs) - Math.min(...xs) + 1;
+                this.height = Math.max(...ys) - Math.min(...ys) + 1;
+            }
+
+            getAbsolutePoints() {
+                const gridY = Math.floor(this.y);
+                return this.points.map(p => ({ x: this.x + p.x, y: gridY + p.y }));
+            }
+
+            moveDown(speed) {
+                this.y += speed;
+            }
+
+            addBlock(relX, relY) {
+                if (this.points.some(p => p.x === relX && p.y === relY)) return false;
+                this.points.push({ x: relX, y: relY });
+                this.recalcBounds();
+                return true;
+            }
+
+            isPerfectRectangle() {
+                if (this.points.length === 0) return false;
+                let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+                for (const p of this.points) {
+                    if (p.x < minX) minX = p.x;
+                    if (p.x > maxX) maxX = p.x;
+                    if (p.y < minY) minY = p.y;
+                    if (p.y > maxY) maxY = p.y;
+                }
+                const w = maxX - minX + 1;
+                const h = maxY - minY + 1;
+                return this.points.length === w * h;
+            }
+        }
+
+        class Player {
+            constructor(id, startX, color) {
+                this.id = id;
+                this.x = startX;
+                this.color = color;
+            }
+        }
+
+        // === GAME ENGINE ===
+        class GameEngine {
+            constructor() {
+                this.shapes = [];
+                this.bullets = [];
+                this.players = [];
+                this.particles = [];
+                this.score = 0;
+                this.level = 1;
+                this.nextLevelScore = 3000;
+                this.shapeSpawnRate = 220;
+                this.gameSpeed = 0.012;
+                this.framesSinceSpawn = 0;
+                this.gameOver = false;
+                this.paused = false;
+            }
+
+            init(numPlayers) {
+                // Distribute players evenly across the grid
+                this.players = [];
+                for (let i = 0; i < numPlayers; i++) {
+                    const x = Math.floor((GRID_WIDTH / (numPlayers + 1)) * (i + 1));
+                    this.players.push(new Player(i + 1, x, PLAYER_COLORS[i]));
+                }
+            }
+
+            createRandomShape() {
+                let maxTier = Math.min(this.level, 2);
+                let tier = Math.floor(Math.random() * maxTier) + 1;
+                const tierShapes = SHAPES_TIERS[tier];
+                const template = tierShapes[Math.floor(Math.random() * tierShapes.length)];
+                const points = template.map(p => ({ ...p }));
+                const width = Math.max(...points.map(p => p.x)) + 1;
+                const xStart = Math.floor(Math.random() * (GRID_WIDTH - width));
+                const height = Math.max(...points.map(p => p.y)) + 1;
+                return new Shape(xStart, -height, points);
+            }
+
+            update() {
+                if (this.gameOver || this.paused) return;
+
+                // Leveling
+                if (this.score >= this.nextLevelScore) {
+                    this.level++;
+                    this.nextLevelScore = Math.floor(this.nextLevelScore * 1.6);
+                    this.gameSpeed += 0.001;
+                    this.shapeSpawnRate = Math.max(100, this.shapeSpawnRate - 5);
+                }
+
+                // Spawn
+                this.framesSinceSpawn++;
+                if (this.framesSinceSpawn > this.shapeSpawnRate) {
+                    this.shapes.push(this.createRandomShape());
+                    this.framesSinceSpawn = 0;
+                }
+
+                // Update particles
+                this.particles.forEach(p => p.update());
+                this.particles = this.particles.filter(p => p.life > 0);
+
+                // Move shapes
+                for (const shape of this.shapes) {
+                    shape.moveDown(this.gameSpeed);
+                    const maxShapeY = Math.max(...shape.getAbsolutePoints().map(p => p.y));
+                    if (maxShapeY >= GRID_HEIGHT - 1) {
+                        this.gameOver = true;
+                    }
+                }
+
+                // Move bullets
+                const bulletsToRemove = [];
+                const shapesToRemove = [];
+
+                this.bullets.forEach((bullet, bIdx) => {
+                    bullet.y -= 0.8;
+                    if (bullet.y < -5) {
+                        bulletsToRemove.push(bIdx);
+                        return;
+                    }
+
+                    for (let sIdx = 0; sIdx < this.shapes.length; sIdx++) {
+                        const shape = this.shapes[sIdx];
+                        const shapePoints = shape.getAbsolutePoints();
+                        const hitPoint = shapePoints.find(p => p.x === bullet.x && Math.floor(bullet.y) === p.y);
+
+                        if (hitPoint) {
+                            const targetY = hitPoint.y + 1;
+                            const relX = bullet.x - shape.x;
+                            const relY = targetY - Math.floor(shape.y);
+                            const added = shape.addBlock(relX, relY);
+                            if (added) {
+                                bulletsToRemove.push(bIdx);
+                                if (shape.isPerfectRectangle()) {
+                                    const area = shape.points.length;
+                                    this.score += area * area * 10 * this.level;
+                                    shapesToRemove.push(sIdx);
+
+                                    // Particles
+                                    shape.getAbsolutePoints().forEach(p => {
+                                        for (let i = 0; i < 5; i++) {
+                                            this.particles.push(new Particle(
+                                                p.x * BLOCK_SIZE + BLOCK_SIZE / 2,
+                                                p.y * BLOCK_SIZE + BLOCK_SIZE / 2,
+                                                '#fbbf24'
+                                            ));
+                                        }
+                                    });
+                                }
+                            }
+                            break;
+                        }
+                    }
+                });
+
+                const bSet = new Set(bulletsToRemove);
+                const sSet = new Set(shapesToRemove);
+                this.bullets = this.bullets.filter((_, i) => !bSet.has(i));
+                this.shapes = this.shapes.filter((_, i) => !sSet.has(i));
+            }
+
+            movePlayer(pid, dir) {
+                const p = this.players.find(pl => pl.id === pid);
+                if (!p) return;
+                const newX = p.x + dir;
+                if (newX >= 0 && newX < GRID_WIDTH) p.x = newX;
+            }
+
+            shoot(pid) {
+                const p = this.players.find(pl => pl.id === pid);
+                if (!p) return;
+                const myBullets = this.bullets.filter(b => b.owner === pid);
+                if (myBullets.length >= 4) return;
+                this.bullets.push({ x: p.x, y: GRID_HEIGHT - 1, owner: pid });
+            }
+
+            getState() {
+                return {
+                    shapes: this.shapes,
+                    bullets: this.bullets,
+                    players: this.players,
+                    particles: this.particles,
+                    score: this.score,
+                    level: this.level,
+                    gameOver: this.gameOver
+                };
+            }
+
+            setState(state) {
+                this.shapes = state.shapes.map(s => {
+                    const shape = new Shape(s.x, s.y, s.points);
+                    shape.id = s.id;
+                    return shape;
+                });
+                this.bullets = state.bullets;
+                this.players = state.players;
+                this.particles = state.particles.map(p => Object.assign(new Particle(p.x, p.y, p.color), p));
+                this.score = state.score;
+                this.level = state.level;
+                this.gameOver = state.gameOver;
+            }
+        }
+
+        // === PEER CONNECTION ===
+        const MAX_PLAYERS = 4;
+        const PLAYER_COLORS = ['#fb7185', '#60a5fa', '#34d399', '#f59e0b'];
+
+        let peer = null;
+        let connections = []; // Array of connections for host
+        let hostConnection = null; // Single connection for guests
+        let isHost = false;
+        let myPeerId = null;
+        let playerName = 'Player';
+        let players = [];
+        let myPlayerIndex = -1;
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const panelWidth = 60;
+
+        // Responsive canvas sizing
+        function resizeCanvas() {
+            const maxWidth = window.innerWidth * 0.9;
+            const maxHeight = window.innerHeight * 0.9;
+            const idealWidth = GRID_WIDTH * BLOCK_SIZE + panelWidth * 2;
+            const idealHeight = GRID_HEIGHT * BLOCK_SIZE;
+
+            const scale = Math.min(1, maxWidth / idealWidth, maxHeight / idealHeight);
+            canvas.width = idealWidth;
+            canvas.height = idealHeight;
+            canvas.style.width = (idealWidth * scale) + 'px';
+            canvas.style.height = (idealHeight * scale) + 'px';
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const engine = new GameEngine();
+        let animationId = null;
+
+        function initPeer() {
+            peer = new Peer();
+
+            peer.on('open', (id) => {
+                myPeerId = id;
+                document.getElementById('connection-status').innerHTML =
+                    '<div class="text-green-400 text-xl">● CONNECTED</div>';
+                document.getElementById('lobby-options').classList.remove('hidden');
+            });
+
+            peer.on('connection', (connection) => {
+                if (!isHost) return;
+
+                // Check if we have room for more players
+                if (players.length >= MAX_PLAYERS) {
+                    connection.send({ type: 'roomFull' });
+                    connection.close();
+                    return;
+                }
+
+                connections.push(connection);
+                setupConnection(connection);
+            });
+
+            peer.on('error', (err) => {
+                console.error('Peer error:', err);
+                alert('Connection error: ' + err.type);
+            });
+        }
+
+        function setupConnection(connection) {
+            connection.on('data', (data) => {
+                handleMessage(data, connection);
+            });
+
+            connection.on('close', () => {
+                if (isHost) {
+                    // Remove disconnected player
+                    const index = connections.indexOf(connection);
+                    if (index > -1) {
+                        connections.splice(index, 1);
+                        // Remove player from list
+                        players = players.filter(p => p.connection !== connection);
+                        updatePlayerList();
+                        broadcastToAll({ type: 'playerList', players: players.map(p => ({ id: p.id, name: p.name, color: p.color })) });
+                    }
+                } else {
+                    alert('Connection to host lost!');
+                    location.reload();
+                }
+            });
+        }
+
+        function handleMessage(data, connection = null) {
+            if (data.type === 'roomFull') {
+                alert('Room is full! Maximum 4 players.');
+                location.reload();
+            } else if (data.type === 'playerJoined') {
+                if (isHost && connection) {
+                    // Assign player index and color
+                    const playerIndex = players.length;
+                    const newPlayer = {
+                        ...data.player,
+                        index: playerIndex,
+                        color: PLAYER_COLORS[playerIndex],
+                        connection: connection
+                    };
+                    players.push(newPlayer);
+                    updatePlayerList();
+
+                    // Send updated player list to everyone
+                    broadcastToAll({
+                        type: 'playerList',
+                        players: players.map(p => ({ id: p.id, name: p.name, color: p.color, index: p.index }))
+                    });
+
+                    // Send player index to the new player
+                    connection.send({ type: 'yourIndex', index: playerIndex });
+
+                    if (players.length >= 2) {
+                        document.getElementById('start-game-btn').classList.remove('hidden');
+                        document.getElementById('waiting-message').classList.add('hidden');
+                    }
+                }
+            } else if (data.type === 'playerList') {
+                // Update player list for guests
+                players = data.players;
+                updatePlayerList();
+            } else if (data.type === 'yourIndex') {
+                myPlayerIndex = data.index;
+            } else if (data.type === 'gameStart') {
+                startMultiplayerGame();
+            } else if (data.type === 'gameState') {
+                engine.setState(data.state);
+            } else if (data.type === 'playerInput') {
+                if (isHost) {
+                    const { action, playerIndex } = data;
+                    if (action === 'left') engine.movePlayer(playerIndex + 1, -1);
+                    else if (action === 'right') engine.movePlayer(playerIndex + 1, 1);
+                    else if (action === 'shoot') engine.shoot(playerIndex + 1);
+                }
+            }
+        }
+
+        function broadcastToAll(message) {
+            connections.forEach(conn => {
+                if (conn && conn.open) {
+                    conn.send(message);
+                }
+            });
+        }
+
+        document.getElementById('host-btn').addEventListener('click', () => {
+            playerName = document.getElementById('player-name').value || 'Player';
+            isHost = true;
+            myPlayerIndex = 0;
+            players = [{ id: myPeerId, name: playerName, color: PLAYER_COLORS[0], index: 0 }];
+
+            document.getElementById('lobby-options').classList.add('hidden');
+            document.getElementById('waiting-room').classList.remove('hidden');
+            document.getElementById('room-id-display').textContent = myPeerId;
+            updatePlayerList();
+        });
+
+        document.getElementById('join-btn').addEventListener('click', () => {
+            const roomId = document.getElementById('room-id-input').value.trim();
+            if (!roomId) {
+                alert('Please enter a room ID!');
+                return;
+            }
+            playerName = document.getElementById('player-name').value || 'Player';
+
+            hostConnection = peer.connect(roomId);
+            setupConnection(hostConnection);
+
+            hostConnection.on('open', () => {
+                hostConnection.send({
+                    type: 'playerJoined',
+                    player: { id: myPeerId, name: playerName }
+                });
+
+                document.getElementById('lobby-options').classList.add('hidden');
+                document.getElementById('waiting-room').classList.remove('hidden');
+                document.getElementById('room-id-display').textContent = roomId;
+            });
+        });
+
+        document.getElementById('start-game-btn').addEventListener('click', () => {
+            broadcastToAll({ type: 'gameStart' });
+            startMultiplayerGame();
+        });
+
+        function updatePlayerList() {
+            const list = document.getElementById('player-list');
+            list.innerHTML = players.map(p =>
+                `<div style="color: ${p.color}">► ${p.name}</div>`
+            ).join('');
+        }
+
+        function startMultiplayerGame() {
+            document.getElementById('lobby-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+            engine.init(players.length);
+
+            if (isHost) {
+                gameLoop();
+            } else {
+                guestLoop();
+            }
+        }
+
+        function gameLoop() {
+            if (engine.gameOver) return;
+
+            engine.update();
+
+            // Broadcast game state to all connected players
+            broadcastToAll({
+                type: 'gameState',
+                state: engine.getState()
+            });
+
+            render();
+            animationId = requestAnimationFrame(gameLoop);
+        }
+
+        function guestLoop() {
+            render();
+            requestAnimationFrame(guestLoop);
+        }
+
+        function render() {
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Side Panels
+            const gradient = ctx.createLinearGradient(0, 0, panelWidth, 0);
+            gradient.addColorStop(0, '#0f172a');
+            gradient.addColorStop(1, '#1e293b');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, panelWidth, canvas.height);
+
+            const gradientR = ctx.createLinearGradient(canvas.width - panelWidth, 0, canvas.width, 0);
+            gradientR.addColorStop(0, '#1e293b');
+            gradientR.addColorStop(1, '#0f172a');
+            ctx.fillStyle = gradientR;
+            ctx.fillRect(canvas.width - panelWidth, 0, panelWidth, canvas.height);
+
+            ctx.save();
+            ctx.translate(panelWidth, 0);
+
+            // Grid
+            ctx.strokeStyle = '#334155';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            for (let x = 0; x <= GRID_WIDTH; x++) {
+                ctx.moveTo(x * BLOCK_SIZE, 0);
+                ctx.lineTo(x * BLOCK_SIZE, canvas.height);
+            }
+            for (let y = 0; y <= GRID_HEIGHT; y++) {
+                ctx.moveTo(0, y * BLOCK_SIZE);
+                ctx.lineTo(GRID_WIDTH * BLOCK_SIZE, y * BLOCK_SIZE);
+            }
+            ctx.stroke();
+
+            // Shapes
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = 'rgba(251, 191, 36, 0.5)';
+
+            engine.shapes.forEach(shape => {
+                const points = shape.getAbsolutePoints();
+
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                points.forEach(p => {
+                    ctx.rect(p.x * BLOCK_SIZE, p.y * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                });
+                ctx.stroke();
+
+                points.forEach(p => {
+                    const x = p.x * BLOCK_SIZE;
+                    const y = p.y * BLOCK_SIZE;
+                    const gradient = ctx.createLinearGradient(x, y, x + BLOCK_SIZE, y + BLOCK_SIZE);
+                    gradient.addColorStop(0, '#fbbf24');
+                    gradient.addColorStop(1, '#f59e0b');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
+
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                    ctx.fillRect(x + 2, y + 2, BLOCK_SIZE - 4, 4);
+                    ctx.fillRect(x + 2, y + 2, 4, BLOCK_SIZE - 4);
+
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+                    ctx.fillRect(x + 2, y + BLOCK_SIZE - 6, BLOCK_SIZE - 4, 4);
+                    ctx.fillRect(x + BLOCK_SIZE - 6, y + 2, 4, BLOCK_SIZE - 4);
+                });
+            });
+
+            ctx.shadowBlur = 0;
+
+            // Particles
+            engine.particles.forEach(p => {
+                ctx.globalAlpha = p.life;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1.0;
+            });
+
+            // Bullets
+            engine.bullets.forEach(b => {
+                ctx.fillStyle = b.owner === 1 ? '#ef4444' : '#3b82f6';
+                const size = BLOCK_SIZE / 3;
+                const offset = (BLOCK_SIZE - size) / 2;
+                ctx.fillRect(b.x * BLOCK_SIZE + offset, b.y * BLOCK_SIZE + offset, size, size);
+            });
+
+            // Aiming guides
+            engine.players.forEach(p => {
+                ctx.strokeStyle = p.color;
+                ctx.globalAlpha = 0.3;
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                const centerX = p.x * BLOCK_SIZE + BLOCK_SIZE / 2;
+                ctx.moveTo(centerX, (GRID_HEIGHT - 1) * BLOCK_SIZE);
+                ctx.lineTo(centerX, 0);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.globalAlpha = 1.0;
+            });
+
+            // Players
+            engine.players.forEach(p => {
+                ctx.fillStyle = p.color;
+                const x = p.x * BLOCK_SIZE;
+                const y = (GRID_HEIGHT - 1) * BLOCK_SIZE;
+                ctx.beginPath();
+                ctx.moveTo(x + BLOCK_SIZE / 2, y);
+                ctx.lineTo(x + BLOCK_SIZE, y + BLOCK_SIZE);
+                ctx.lineTo(x, y + BLOCK_SIZE);
+                ctx.closePath();
+                ctx.fill();
+            });
+
+            ctx.restore();
+
+            document.getElementById('score-display').textContent = `Lvl ${engine.level} • ${engine.score}`;
+        }
+
+        // Pause functions
+        function togglePause() {
+            if (engine.gameOver) return;
+            engine.paused = !engine.paused;
+            if (engine.paused) {
+                document.getElementById('pause-menu').classList.remove('hidden');
+            } else {
+                document.getElementById('pause-menu').classList.add('hidden');
+            }
+        }
+
+        function resumeGame() {
+            engine.paused = false;
+            document.getElementById('pause-menu').classList.add('hidden');
+        }
+
+        function backToLobby() {
+            if (animationId) cancelAnimationFrame(animationId);
+            location.reload();
+        }
+
+        // Input
+        window.addEventListener('keydown', (e) => {
+            // ESC for pause
+            if (e.code === 'Escape') {
+                togglePause();
+                return;
+            }
+
+            if (engine.gameOver || engine.paused) return;
+
+            let action = null;
+            if (e.code === 'KeyA' || e.code === 'ArrowLeft') action = 'left';
+            else if (e.code === 'KeyD' || e.code === 'ArrowRight') action = 'right';
+            else if (e.code === 'Space' || e.code === 'Enter') action = 'shoot';
+
+            if (action) {
+                e.preventDefault();
+
+                if (isHost) {
+                    // Host applies directly (player 1)
+                    if (action === 'left') engine.movePlayer(1, -1);
+                    else if (action === 'right') engine.movePlayer(1, 1);
+                    else if (action === 'shoot') engine.shoot(1);
+                } else {
+                    // Guest sends to host with their player index
+                    if (hostConnection && hostConnection.open) {
+                        hostConnection.send({
+                            type: 'playerInput',
+                            playerIndex: myPlayerIndex,
+                            action: action
+                        });
+                    }
+                }
+            }
+        });
+
+        window.addEventListener('load', () => {
+            initPeer();
+        });
+    </script>
+</body>
+
+</html>
