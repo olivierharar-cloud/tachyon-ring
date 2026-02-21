@@ -79,8 +79,20 @@
     </style>
 </head>
 
-<body class="bg-gradient-to-br from-slate-900 via-purple-900 to-black min-h-screen text-white overflow-hidden">
+<body
+    class="bg-gradient-to-br from-slate-900 via-purple-900 to-black min-h-screen text-white overflow-y-auto overflow-x-hidden scrollbar-hide">
 
+    <!-- Hide scrollbar for webkit to keep aesthetic clean but allow scrolling -->
+    <style>
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
     <!-- Animated Background -->
     <div class="fixed inset-0 z-0">
         <div
@@ -89,10 +101,10 @@
     </div>
 
     <!-- Portal Container -->
-    <div id="portal-container" class="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 py-12">
+    <div id="portal-container" class="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 py-6">
 
         <!-- Title -->
-        <div class="float-animation mb-12">
+        <div class="float-animation mb-6 block md:flex md:gap-4 md:items-end">
             <h1 class="retro-title text-6xl md:text-8xl text-yellow-400 text-center mb-4">
                 TACHYON
             </h1>
@@ -101,7 +113,7 @@
             </h1>
         </div>
 
-        <p class="text-xl md:text-2xl text-gray-300 text-center mb-12 max-w-2xl">
+        <p class="text-xl md:text-2xl text-gray-300 text-center mb-6 max-w-2xl">
             Un jeu d'action multijoueur où vous devez compléter des formes géométriques avant qu'elles n'atteignent le
             sol !
         </p>
