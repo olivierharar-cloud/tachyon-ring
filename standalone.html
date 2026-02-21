@@ -437,9 +437,57 @@
                 this.isPlaying = false;
                 this.nextNoteTime = 0;
                 this.currentStep = 0;
-                this.tempo = 125;
+                this.baseTempo = 125;
+                this.tempo = this.baseTempo;
+                this.isDanger = false;
                 this.stepDuration = (60 / this.tempo) / 4;
                 this.schedulerTimer = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    this.createDrumBuffers();
+                    this.createClearBuffer();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            setDanger(danger) {
+                if (this.isDanger === danger) return;
+                this.isDanger = danger;
+                this.tempo = danger ? 150 : this.baseTempo;
+                this.stepDuration = (60 / this.tempo) / 4;
+            }
+
+            createDrumBuffers() {
+                this.snareBuffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.2, this.ctx.sampleRate);
+                const data = this.snareBuffer.getChannelData(0);
+                for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+            }
+
+            createClearBuffer() {
+                // A tiny ping for clearing blocks
+                const sr = this.ctx.sampleRate || 44100;
+                this.clearBuffer = this.ctx.createBuffer(1, sr * 0.1, sr);
+                const data = this.clearBuffer.getChannelData(0);
+                for (let i = 0; i < data.length; i++) {
+                    const t = i / sr;
+                    // high frequency chirp
+                    data[i] = Math.sin(2 * Math.PI * (1000 + t * 4000) * t) * Math.exp(-t * 20);
+                }
+            }
+
+            playClearSound() {
+                if (!this.ctx || !this.isPlaying) return;
+                const source = this.ctx.createBufferSource();
+                source.buffer = this.clearBuffer;
+                const gain = this.ctx.createGain();
+                source.connect(gain); gain.connect(this.ctx.destination);
+                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                source.start();
             }
 
             init() {
@@ -493,30 +541,36 @@
             }
 
             scheduleNote() {
-                // Rock pentatonic minor (C minor)
-                // C2: 65.41, Eb2: 77.78, F2: 87.31, G2: 98.00, Bb2: 116.54, C3: 130.81, Eb3: 155.56, G3: 196.00
+                // Rock pentatonic minor (C minor base)
                 const bassNotes = [65.41, 0, 77.78, 0, 65.41, 0, 98.00, 77.78, 65.41, 0, 65.41, 0, 116.54, 0, 98.00, 0];
                 const chordNotes = [0, 0, 130.81, 0, 0, 0, 155.56, 0, 0, 0, 130.81, 0, 196.00, 0, 0, 0];
 
-                const step = this.currentStep % 16;
+                const step16 = this.currentStep % 16;
+                const bar = Math.floor((this.currentStep % 64) / 16);
                 const time = this.nextNoteTime;
 
-                // Drums
-                if (step === 0 || step === 8 || step === 10) this.playDrum('kick', time);
-                if (step === 4 || step === 12) this.playDrum('snare', time);
+                // Transposition per bar: 0 (C), +3 (Eb), +5 (F), +7 (G) semitones
+                const transposeSt = [0, 3, 5, 7][bar];
+                const multiplier = Math.pow(2, transposeSt / 12);
 
-                // Slap Bass (Triangle + Square mix for that Amiga 16-bit crunch)
-                const bassFn = bassNotes[step];
+                // Drums (busier in danger mode)
+                if (step16 === 0 || step16 === 8 || step16 === 10) this.playDrum('kick', time);
+                if (this.isDanger && (step16 === 2 || step16 === 14)) this.playDrum('kick', time); // Double kick in danger
+
+                if (step16 === 4 || step16 === 12) this.playDrum('snare', time);
+
+                // Slap Bass
+                const bassFn = bassNotes[step16];
                 if (bassFn > 0) {
-                    this.playSynth(bassFn, time, 'triangle', 0.15, 0.7);
-                    this.playSynth(bassFn, time, 'square', 0.1, 0.2);
+                    this.playSynth(bassFn * multiplier, time, 'triangle', 0.15, 0.7);
+                    this.playSynth(bassFn * multiplier, time, 'square', 0.1, 0.2);
                 }
 
                 // Staccato Chords
-                const chordFn = chordNotes[step];
+                const chordFn = chordNotes[step16];
                 if (chordFn > 0) {
-                    this.playSynth(chordFn, time, 'square', 0.08, 0.2);
-                    this.playSynth(chordFn * 1.5, time, 'square', 0.08, 0.15); // Power chord 5th
+                    this.playSynth(chordFn * multiplier, time, 'square', 0.08, 0.2);
+                    this.playSynth(chordFn * multiplier * 1.5, time, 'square', 0.08, 0.15); // Power chord 5th
                 }
             }
 
@@ -665,6 +719,16 @@
                 this._updateFallingPU(speed);
                 this.particles.forEach(p => p.update());
                 this.particles = this.particles.filter(p => p.life > 0);
+
+                // Check Danger State (blocks getting close to bottom)
+                let maxY = 0;
+                for (const shape of this.shapes) {
+                    for (const pt of shape.getAbsolutePoints()) {
+                        if (pt.y > maxY) maxY = pt.y;
+                    }
+                }
+                // Grid height is 20, so a block at y=14 is getting very close
+                audioSystem.setDanger(maxY >= GRID_HEIGHT - 6);
             }
 
             _updateDifficulty() {
@@ -795,6 +859,7 @@
             }
 
             _clearShape(shape, si, deadS) {
+                audioSystem.playClearSound();
                 this._registerCombo(); this.totalRects++;
                 const area = shape.points.length;
                 this.score += Math.floor(area * 50 * this.combo.multiplier);
