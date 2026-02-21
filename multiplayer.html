@@ -250,25 +250,27 @@
             }
 
             createClearBuffer() {
-                // A tiny ping for clearing blocks
-                const sr = this.ctx.sampleRate || 44100;
-                this.clearBuffer = this.ctx.createBuffer(1, sr * 0.1, sr);
-                const data = this.clearBuffer.getChannelData(0);
-                for (let i = 0; i < data.length; i++) {
-                    const t = i / sr;
-                    // high frequency chirp
-                    data[i] = Math.sin(2 * Math.PI * (1000 + t * 4000) * t) * Math.exp(-t * 20);
-                }
+                // No longer used, swapped to live oscillator
             }
 
             playClearSound() {
                 if (!this.ctx || !this.isPlaying) return;
-                const source = this.ctx.createBufferSource();
-                source.buffer = this.clearBuffer;
+                const time = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
                 const gain = this.ctx.createGain();
-                source.connect(gain); gain.connect(this.ctx.destination);
-                gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
-                source.start();
+
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(880, time); // A5
+                osc.frequency.exponentialRampToValueAtTime(1760, time + 0.15); // Ramp up to A6
+
+                gain.gain.setValueAtTime(0.4, time);
+                gain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(time);
+                osc.stop(time + 0.2);
             }
 
             playDrum(type, time) {
