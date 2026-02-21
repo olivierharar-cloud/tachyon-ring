@@ -168,14 +168,19 @@
 
         </div>
 
-        <!-- Documentation Cards -->
-        <div class="grid md:grid-cols-4 gap-4 max-w-4xl w-full mb-8">
-
+        <!-- High Scores Button (PROMINENT) -->
+        <div class="mb-8 max-w-4xl w-full">
             <button onclick="document.getElementById('high-scores-modal').classList.remove('hidden')"
-                class="bg-slate-800/50 backdrop-blur-md border-2 border-yellow-500 rounded-xl p-6 hover:bg-yellow-500/20 transition-all duration-300 text-center flex flex-col items-center justify-center cursor-pointer pulse-glow">
-                <div class="text-3xl mb-2">🏆</div>
-                <h3 class="text-sm md:text-md font-bold text-yellow-400 mb-1">HIGH SCORES</h3>
+                class="w-full bg-slate-900/80 backdrop-blur-md border-4 border-yellow-500 rounded-2xl p-6 hover:bg-yellow-500/20 hover:scale-[1.02] transition-all duration-300 text-center flex items-center justify-center gap-6 cursor-pointer pulse-glow shadow-2xl shadow-yellow-500/20 text-yellow-400">
+                <div class="text-4xl md:text-5xl">🏆</div>
+                <h3 class="text-2xl md:text-3xl font-bold mt-2" style="font-family: 'Press Start 2P', cursive;">HALL OF
+                    FAME</h3>
+                <div class="text-4xl md:text-5xl">🏆</div>
             </button>
+        </div>
+
+        <!-- Documentation Cards -->
+        <div class="grid md:grid-cols-3 gap-4 max-w-4xl w-full mb-8">
 
             <a href="test-multiplayer.html"
                 class="bg-slate-800/50 backdrop-blur-md border-2 border-slate-600 rounded-xl p-6 hover:border-yellow-500 transition-all duration-300 text-center">
