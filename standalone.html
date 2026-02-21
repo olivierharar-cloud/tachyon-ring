@@ -308,15 +308,15 @@
 
         const DIFFICULTY_LEVELS = [
             { minScore: 0, speed: 0.015, spawnRate: 500, color: '#22d3ee', name: 'Débutant' },
-            { minScore: 5000, speed: 0.016, spawnRate: 490, color: '#4ade80', name: 'Normal' },
-            { minScore: 12000, speed: 0.017, spawnRate: 480, color: '#a3e635', name: 'Avancé' },
-            { minScore: 22000, speed: 0.018, spawnRate: 470, color: '#fbbf24', name: 'Rapide' },
-            { minScore: 35000, speed: 0.019, spawnRate: 460, color: '#fb923c', name: 'Intense' },
-            { minScore: 50000, speed: 0.020, spawnRate: 450, color: '#f97316', name: 'Expert' },
-            { minScore: 70000, speed: 0.021, spawnRate: 440, color: '#ef4444', name: 'Furieux' },
-            { minScore: 95000, speed: 0.022, spawnRate: 430, color: '#e11d48', name: 'Légendaire' },
-            { minScore: 130000, speed: 0.023, spawnRate: 420, color: '#a855f7', name: 'Tachyon' },
-            { minScore: 180000, speed: 0.024, spawnRate: 400, color: '#d946ef', name: 'Supernova' }
+            { minScore: 5000, speed: 0.017, spawnRate: 490, color: '#4ade80', name: 'Normal' },
+            { minScore: 12000, speed: 0.019, spawnRate: 480, color: '#a3e635', name: 'Avancé' },
+            { minScore: 22000, speed: 0.021, spawnRate: 470, color: '#fbbf24', name: 'Rapide' },
+            { minScore: 35000, speed: 0.023, spawnRate: 460, color: '#fb923c', name: 'Intense' },
+            { minScore: 50000, speed: 0.025, spawnRate: 450, color: '#f97316', name: 'Expert' },
+            { minScore: 70000, speed: 0.027, spawnRate: 440, color: '#ef4444', name: 'Furieux' },
+            { minScore: 95000, speed: 0.029, spawnRate: 430, color: '#e11d48', name: 'Légendaire' },
+            { minScore: 130000, speed: 0.031, spawnRate: 420, color: '#a855f7', name: 'Tachyon' },
+            { minScore: 180000, speed: 0.033, spawnRate: 400, color: '#d946ef', name: 'Supernova' }
         ];
 
         const COMBO_MULTIPLIERS = [1, 1.5, 2, 2.5, 3, 4, 5, 8, 10];
@@ -425,6 +425,24 @@
                 [{ x: 0, y: 0 }, { x: 3, y: 0 }, { x: 6, y: 0 }, { x: 9, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 4, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 }, { x: 7, y: 1 }, { x: 8, y: 1 }, { x: 9, y: 1 }],
                 [{ x: 4, y: 0 }, { x: 5, y: 0 }, { x: 3, y: 1 }, { x: 4, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 5, y: 2 }, { x: 6, y: 2 }, { x: 7, y: 2 }, { x: 1, y: 3 }, { x: 2, y: 3 }, { x: 3, y: 3 }, { x: 4, y: 3 }, { x: 5, y: 3 }, { x: 6, y: 3 }, { x: 7, y: 3 }, { x: 8, y: 3 }],
                 [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 3, y: 0 }, { x: 4, y: 0 }, { x: 5, y: 0 }, { x: 6, y: 0 }, { x: 7, y: 0 }, { x: 8, y: 0 }, { x: 9, y: 0 }, { x: 10, y: 0 }, { x: 11, y: 0 }, { x: 0, y: 1 }, { x: 5, y: 1 }, { x: 6, y: 1 }, { x: 11, y: 1 }],
+            ],
+            9: [ // Tall & Complex irregulars (5 lines high)
+                [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 2, y: 0 }, { x: 1, y: 1 }, { x: 2, y: 1 }, { x: 1, y: 2 }, { x: 3, y: 2 }, { x: 1, y: 3 }, { x: 3, y: 3 }, { x: 1, y: 4 }],
+                [{ x: 2, y: 0 }, { x: 3, y: 0 }, { x: 1, y: 1 }, { x: 0, y: 2 }, { x: 2, y: 2 }, { x: 0, y: 3 }, { x: 2, y: 3 }, { x: 4, y: 3 }, { x: 2, y: 4 }, { x: 4, y: 4 }],
+                [{ x: 0, y: 0 }, { x: 2, y: 0 }, { x: 4, y: 0 }, { x: 0, y: 1 }, { x: 4, y: 1 }, { x: 0, y: 2 }, { x: 2, y: 2 }, { x: 4, y: 2 }, { x: 1, y: 3 }, { x: 3, y: 3 }, { x: 1, y: 4 }, { x: 3, y: 4 }],
+            ],
+            10: [ // Highly irregular structures (6 lines high)
+                [{ x: 1, y: 0 }, { x: 4, y: 0 }, { x: 1, y: 1 }, { x: 4, y: 1 }, { x: 0, y: 2 }, { x: 2, y: 2 }, { x: 3, y: 2 }, { x: 5, y: 2 }, { x: 0, y: 3 }, { x: 5, y: 3 }, { x: 2, y: 4 }, { x: 3, y: 4 }, { x: 2, y: 5 }],
+                [{ x: 0, y: 0 }, { x: 5, y: 0 }, { x: 0, y: 1 }, { x: 5, y: 1 }, { x: 0, y: 2 }, { x: 2, y: 2 }, { x: 5, y: 2 }, { x: 1, y: 3 }, { x: 4, y: 3 }, { x: 1, y: 4 }, { x: 4, y: 4 }, { x: 2, y: 5 }, { x: 3, y: 5 }],
+                [{ x: 3, y: 0 }, { x: 2, y: 1 }, { x: 3, y: 1 }, { x: 1, y: 2 }, { x: 3, y: 2 }, { x: 4, y: 2 }, { x: 0, y: 3 }, { x: 3, y: 3 }, { x: 5, y: 3 }, { x: 0, y: 4 }, { x: 5, y: 4 }, { x: 0, y: 5 }, { x: 1, y: 5 }, { x: 5, y: 5 }],
+            ],
+            11: [ // Monstruous cascading grids (7 lines high)
+                [{ x: 0, y: 0 }, { x: 6, y: 0 }, { x: 1, y: 1 }, { x: 5, y: 1 }, { x: 2, y: 2 }, { x: 4, y: 2 }, { x: 3, y: 3 }, { x: 2, y: 4 }, { x: 4, y: 4 }, { x: 1, y: 5 }, { x: 5, y: 5 }, { x: 0, y: 6 }, { x: 6, y: 6 }],
+                [{ x: 2, y: 0 }, { x: 4, y: 0 }, { x: 1, y: 1 }, { x: 5, y: 1 }, { x: 0, y: 2 }, { x: 6, y: 2 }, { x: 0, y: 3 }, { x: 6, y: 3 }, { x: 0, y: 4 }, { x: 6, y: 4 }, { x: 0, y: 5 }, { x: 2, y: 5 }, { x: 4, y: 5 }, { x: 6, y: 5 }, { x: 2, y: 6 }, { x: 4, y: 6 }],
+            ],
+            12: [ // Final boss shapes (Massive walls with irregular hanging spikes, 7 rows high, huge widths)
+                [{ x: 0, y: 0 }, { x: 2, y: 0 }, { x: 4, y: 0 }, { x: 6, y: 0 }, { x: 8, y: 0 }, { x: 0, y: 1 }, { x: 8, y: 1 }, { x: 0, y: 2 }, { x: 8, y: 2 }, { x: 0, y: 3 }, { x: 2, y: 3 }, { x: 4, y: 3 }, { x: 6, y: 3 }, { x: 8, y: 3 }, { x: 0, y: 4 }, { x: 2, y: 4 }, { x: 8, y: 4 }, { x: 0, y: 5 }, { x: 2, y: 5 }, { x: 8, y: 5 }, { x: 2, y: 6 }, { x: 4, y: 6 }],
+                [{ x: 1, y: 0 }, { x: 3, y: 0 }, { x: 5, y: 0 }, { x: 7, y: 0 }, { x: 1, y: 1 }, { x: 3, y: 1 }, { x: 5, y: 1 }, { x: 7, y: 1 }, { x: 0, y: 2 }, { x: 8, y: 2 }, { x: 0, y: 3 }, { x: 8, y: 3 }, { x: 0, y: 4 }, { x: 8, y: 4 }, { x: 2, y: 5 }, { x: 6, y: 5 }, { x: 2, y: 6 }, { x: 6, y: 6 }],
             ]
         };
 
@@ -681,11 +699,15 @@
             }
 
             createRandomShape() {
-                // Tiers unlock faster: tier 5 by level 2, tier 8 by level 4
-                let maxTier = Math.min(Math.floor(this.diffIdx * 2) + 2, 8);
+                // Tiers unlock progressively with difficulty up to Tier 12
+                let maxTier = Math.min(Math.floor(this.diffIdx * 1.5) + 2, 12);
                 let tier = Math.floor(Math.random() * maxTier) + 1;
-                if (Math.random() < 0.3) tier = maxTier; // 30% chance for boss shapes
-                const ts = SHAPES_TIERS[tier]; const tpl = ts[Math.floor(Math.random() * ts.length)];
+                // At higher difficulties, heavily weight towards the newly added complex tiers
+                if (Math.random() < 0.35) tier = maxTier;
+                else if (maxTier > 8 && Math.random() < 0.5) tier = Math.floor(Math.random() * (maxTier - 8)) + 9;
+
+                const ts = SHAPES_TIERS[tier] || SHAPES_TIERS[8]; // Fallback just in case
+                const tpl = ts[Math.floor(Math.random() * ts.length)];
                 const pts = tpl.map(p => ({ ...p }));
                 const w = Math.max(...pts.map(p => p.x)) + 1;
                 const h = Math.max(...pts.map(p => p.y)) + 1;
