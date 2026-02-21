@@ -14,6 +14,12 @@
             font-family: 'VT323', monospace;
         }
 
+        canvas {
+            max-height: 95vh;
+            max-width: 95vw;
+            object-fit: contain;
+        }
+
         @keyframes blink {
 
             0%,
@@ -1031,6 +1037,12 @@
         // ═══════════════════════════════════════════
         // INPUT (4 PLAYERS)
         // ═══════════════════════════════════════════
+
+        // Ensure audio starts on any user click/touch (fixes autoplay policies)
+        window.addEventListener('pointerdown', () => {
+            if (typeof audioSystem !== 'undefined') audioSystem.play();
+        });
+
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Escape') { togglePause(); return; }
             if (engine.gameOver || engine.paused) return;
