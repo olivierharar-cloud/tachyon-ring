@@ -189,6 +189,44 @@
         </div>
     </div>
 
+    <!-- GAME OVER SCREEN -->
+    <div id="game-over"
+        class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div
+            class="flex flex-col items-center justify-center space-y-6 bg-slate-800 p-10 rounded-2xl border border-slate-700 shadow-2xl">
+            <h2 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-500"
+                style="font-family: 'Press Start 2P', cursive;">
+                EQUIPE A TERRE
+            </h2>
+            <p class="text-2xl text-slate-300 font-mono">
+                Score d'équipe: <span id="final-score" class="text-white font-bold">0</span>
+            </p>
+
+            <div id="high-score-form" class="hidden flex-col items-center space-y-4 w-full mt-4">
+                <p class="text-yellow-400 font-bold text-xl blink" style="font-family: 'Press Start 2P', cursive;">TEAM
+                    HIGH SCORE !</p>
+                <input type="text" id="team-initials" maxlength="4" placeholder="TEAM"
+                    class="w-40 bg-black border-2 border-yellow-500 text-yellow-400 text-center text-4xl py-2 uppercase font-mono tracking-widest outline-none focus:border-cyan-400">
+                <button onclick="saveHighScore()"
+                    class="px-8 py-3 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg cursor-pointer w-full">
+                    Enregistrer Localement
+                </button>
+            </div>
+
+            <div id="game-over-buttons" class="flex flex-col space-y-4 w-full mt-6">
+                <!-- In multiplayer, Try Again just sends them back to the lobby to re-host/join -->
+                <button onclick="backToLobby()"
+                    class="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg shadow-emerald-500/20 cursor-pointer w-full">
+                    Nouveau Match (Lobby)
+                </button>
+                <button onclick="window.location.href='index.html'"
+                    class="px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-700 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg cursor-pointer w-full">
+                    🏠 Accueil
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // === CONSTANTS ===
         const GRID_WIDTH = 15;
@@ -961,6 +999,7 @@
         function gameLoop() {
             if (engine.gameOver) {
                 audioSystem.stop();
+                showGameOver();
                 return;
             }
 
@@ -979,6 +1018,8 @@
         function guestLoop() {
             if (engine.gameOver) {
                 audioSystem.stop();
+                showGameOver();
+                return; // Stop rendering if game over
             }
             render();
             requestAnimationFrame(guestLoop);
@@ -1164,6 +1205,43 @@
             }
 
             document.getElementById('score-display').textContent = `Lvl ${engine.level} • ${engine.score}`;
+        }
+
+        // Game Over logic
+        function showGameOver() {
+            if (!document.getElementById('game-over').classList.contains('hidden')) return; // Already showing
+
+            document.getElementById('game-over').classList.remove('hidden');
+            document.getElementById('final-score').innerText = engine.score;
+
+            // Check Multi High Score
+            let scores = JSON.parse(localStorage.getItem('tachyon_hs_multi')) || [];
+            if (scores.length < 5 || engine.score > scores[scores.length - 1].score) {
+                document.getElementById('high-score-form').classList.remove('hidden');
+                document.getElementById('high-score-form').classList.add('flex');
+                document.getElementById('game-over-buttons').classList.add('hidden');
+                document.getElementById('team-initials').focus();
+            } else {
+                document.getElementById('high-score-form').classList.add('hidden');
+                document.getElementById('high-score-form').classList.remove('flex');
+                document.getElementById('game-over-buttons').classList.remove('hidden');
+            }
+        }
+
+        function saveHighScore() {
+            const initials = document.getElementById('team-initials').value.toUpperCase().substring(0, 4) || 'TEAM';
+            let scores = JSON.parse(localStorage.getItem('tachyon_hs_multi')) || [];
+
+            scores.push({ name: initials, score: engine.score, level: engine.level });
+            scores.sort((a, b) => b.score - a.score);
+            scores = scores.slice(0, 5); // Keep top 5
+
+            localStorage.setItem('tachyon_hs_multi', JSON.stringify(scores));
+
+            // Hide form, show regular buttons
+            document.getElementById('high-score-form').classList.add('hidden');
+            document.getElementById('high-score-form').classList.remove('flex');
+            document.getElementById('game-over-buttons').classList.remove('hidden');
         }
 
         // Pause functions

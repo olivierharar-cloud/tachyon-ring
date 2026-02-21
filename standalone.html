@@ -238,18 +238,30 @@
             <p class="text-2xl text-slate-300 font-mono">
                 Score: <span id="final-score" class="text-white font-bold">0</span>
             </p>
-            <button onclick="resetGame()"
-                class="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg shadow-emerald-500/20 cursor-pointer">
-                Try Again
-            </button>
-            <button onclick="backToMenu()"
-                class="px-8 py-4 bg-gradient-to-r from-slate-600 to-slate-700 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg cursor-pointer">
-                Back to Menu
-            </button>
-            <button onclick="window.location.href='home.html'"
-                class="px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-700 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg cursor-pointer">
-                🏠 Accueil
-            </button>
+            <div id="high-score-form" class="hidden flex-col items-center space-y-4 w-full mt-4">
+                <p class="text-yellow-400 font-bold text-xl blink">Nouveau High Score !</p>
+                <input type="text" id="player-initials" maxlength="3" placeholder="AAA"
+                    class="w-32 bg-black border-2 border-yellow-500 text-yellow-400 text-center text-4xl py-2 uppercase font-mono tracking-widest outline-none focus:border-cyan-400">
+                <button onclick="saveHighScore()"
+                    class="px-8 py-3 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg cursor-pointer w-full">
+                    Enregistrer
+                </button>
+            </div>
+
+            <div id="game-over-buttons" class="flex flex-col space-y-4 w-full mt-6">
+                <button onclick="resetGame()"
+                    class="px-8 py-4 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg shadow-emerald-500/20 cursor-pointer w-full">
+                    Try Again
+                </button>
+                <button onclick="backToMenu()"
+                    class="px-8 py-4 bg-gradient-to-r from-slate-600 to-slate-700 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg cursor-pointer w-full">
+                    Back to Menu
+                </button>
+                <button onclick="window.location.href='index.html'"
+                    class="px-8 py-4 bg-gradient-to-r from-cyan-600 to-blue-700 rounded-full text-white font-bold text-xl hover:scale-105 transition-transform shadow-lg cursor-pointer w-full">
+                    🏠 Accueil
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1261,6 +1273,35 @@
             document.getElementById('game-over').classList.remove('hidden');
             document.getElementById('final-score').innerText =
                 `${engine.score} | ◼${engine.totalRects} | x${engine.maxCombo} | ${acc}%`;
+
+            // Check High Score
+            let scores = JSON.parse(localStorage.getItem('tachyon_hs_solo')) || [];
+            if (scores.length < 5 || engine.score > scores[scores.length - 1].score) {
+                document.getElementById('high-score-form').classList.remove('hidden');
+                document.getElementById('high-score-form').classList.add('flex');
+                document.getElementById('game-over-buttons').classList.add('hidden');
+                document.getElementById('player-initials').focus();
+            } else {
+                document.getElementById('high-score-form').classList.add('hidden');
+                document.getElementById('high-score-form').classList.remove('flex');
+                document.getElementById('game-over-buttons').classList.remove('hidden');
+            }
+        }
+
+        function saveHighScore() {
+            const initials = document.getElementById('player-initials').value.toUpperCase().substring(0, 3) || '???';
+            let scores = JSON.parse(localStorage.getItem('tachyon_hs_solo')) || [];
+
+            scores.push({ name: initials, score: engine.score, level: engine.diffIdx + 1 });
+            scores.sort((a, b) => b.score - a.score);
+            scores = scores.slice(0, 5); // Keep top 5
+
+            localStorage.setItem('tachyon_hs_solo', JSON.stringify(scores));
+
+            // Hide form, show regular buttons
+            document.getElementById('high-score-form').classList.add('hidden');
+            document.getElementById('high-score-form').classList.remove('flex');
+            document.getElementById('game-over-buttons').classList.remove('hidden');
         }
 
         function togglePause() {

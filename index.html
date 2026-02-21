@@ -157,7 +157,13 @@
         </div>
 
         <!-- Documentation Cards -->
-        <div class="grid md:grid-cols-3 gap-4 max-w-4xl w-full mb-8">
+        <div class="grid md:grid-cols-4 gap-4 max-w-4xl w-full mb-8">
+
+            <button onclick="document.getElementById('high-scores-modal').classList.remove('hidden')"
+                class="bg-slate-800/50 backdrop-blur-md border-2 border-yellow-500 rounded-xl p-6 hover:bg-yellow-500/20 transition-all duration-300 text-center flex flex-col items-center justify-center cursor-pointer pulse-glow">
+                <div class="text-3xl mb-2">🏆</div>
+                <h3 class="text-sm md:text-md font-bold text-yellow-400 mb-1">HIGH SCORES</h3>
+            </button>
 
             <a href="test-multiplayer.html"
                 class="bg-slate-800/50 backdrop-blur-md border-2 border-slate-600 rounded-xl p-6 hover:border-yellow-500 transition-all duration-300 text-center">
@@ -253,6 +259,115 @@
         </div>
 
     </div>
+
+    <!-- HIGH SCORES MODAL -->
+    <div id="high-scores-modal"
+        class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4">
+        <div
+            class="relative bg-slate-900 border-4 border-yellow-500 p-8 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl shadow-yellow-500/20">
+            <!-- Close Button -->
+            <button onclick="document.getElementById('high-scores-modal').classList.add('hidden')"
+                class="absolute top-4 right-4 text-gray-400 hover:text-white text-3xl font-bold p-2 bg-slate-800/50 rounded-full w-12 h-12 flex items-center justify-center">
+                ×
+            </button>
+
+            <h2 class="text-4xl text-center text-yellow-400 mb-8 blink" style="font-family: 'Press Start 2P', cursive;">
+                HALL OF FAME
+            </h2>
+
+            <div class="grid md:grid-cols-2 gap-8">
+                <!-- Solo Table -->
+                <div class="bg-slate-800/50 border border-slate-700 p-6 rounded-xl">
+                    <h3 class="text-2xl text-emerald-400 mb-4 text-center font-bold">🎯 SOLO TOP 5</h3>
+                    <table class="w-full text-left font-mono" id="table-solo">
+                        <thead>
+                            <tr class="text-gray-400 border-b border-slate-700">
+                                <th class="pb-2">RANG</th>
+                                <th class="pb-2">JOUEUR</th>
+                                <th class="pb-2 text-right">SCORE</th>
+                                <th class="pb-2 text-right">NIV</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-solo">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Multi Table -->
+                <div class="bg-slate-800/50 border border-slate-700 p-6 rounded-xl">
+                    <h3 class="text-2xl text-blue-400 mb-4 text-center font-bold">🎮 MULTI TOP 5</h3>
+                    <table class="w-full text-left font-mono" id="table-multi">
+                        <thead>
+                            <tr class="text-gray-400 border-b border-slate-700">
+                                <th class="pb-2">RANG</th>
+                                <th class="pb-2">EQUIPE</th>
+                                <th class="pb-2 text-right">SCORE</th>
+                                <th class="pb-2 text-right">NIV</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-multi">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Logic -->
+    <script>
+        function loadLeaderboards() {
+            const soloScores = JSON.parse(localStorage.getItem('tachyon_hs_solo')) || [];
+            const multiScores = JSON.parse(localStorage.getItem('tachyon_hs_multi')) || [];
+
+            const tbodySolo = document.getElementById('tbody-solo');
+            const tbodyMulti = document.getElementById('tbody-multi');
+
+            tbodySolo.innerHTML = '';
+            tbodyMulti.innerHTML = '';
+
+            // Render Solo
+            if (soloScores.length === 0) {
+                tbodySolo.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500">Aucun score enregistré</td></tr>';
+            } else {
+                soloScores.forEach((entry, idx) => {
+                    const color = idx === 0 ? 'text-yellow-400 font-bold' : (idx === 1 ? 'text-gray-300' : (idx === 2 ? 'text-orange-400' : 'text-slate-300'));
+                    tbodySolo.innerHTML += `
+                        <tr class="border-b border-slate-700/50 ${color}">
+                            <td class="py-2">#${idx + 1}</td>
+                            <td class="py-2">${entry.name}</td>
+                            <td class="py-2 text-right">${entry.score.toLocaleString()}</td>
+                            <td class="py-2 text-right">${entry.level}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // Render Multi
+            if (multiScores.length === 0) {
+                tbodyMulti.innerHTML = '<tr><td colspan="4" class="text-center py-4 text-gray-500">Aucun score enregistré</td></tr>';
+            } else {
+                multiScores.forEach((entry, idx) => {
+                    const color = idx === 0 ? 'text-yellow-400 font-bold' : (idx === 1 ? 'text-gray-300' : (idx === 2 ? 'text-orange-400' : 'text-slate-300'));
+                    tbodyMulti.innerHTML += `
+                        <tr class="border-b border-slate-700/50 ${color}">
+                            <td class="py-2">#${idx + 1}</td>
+                            <td class="py-2">${entry.name}</td>
+                            <td class="py-2 text-right">${entry.score.toLocaleString()}</td>
+                            <td class="py-2 text-right">${entry.level}</td>
+                        </tr>
+                    `;
+                });
+            }
+        }
+
+        // Call it immediately and also when modal is opened
+        loadLeaderboards();
+
+        // Ensure refresh every time it's clicked so values are up to date
+        document.querySelector('[onclick*="high-scores-modal"]').addEventListener('click', loadLeaderboards);
+    </script>
 
 </body>
 
