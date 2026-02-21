@@ -228,8 +228,8 @@
     </div>
 
     <script>
-        // === CONSTANTS ===
-        const GRID_WIDTH = 15;
+        // === CONSTANTS & DYNAMIC VARS ===
+        let GRID_WIDTH = 15;
         const GRID_HEIGHT = 25;
         const BLOCK_SIZE = 28;
 
@@ -607,6 +607,7 @@
                 this.score = 0;
                 this.level = 1;
                 this.nextLevelScore = 3000;
+                this.baseSpawnRate = 220;
                 this.shapeSpawnRate = 220;
                 this.gameSpeed = 0.022;
                 this.framesSinceSpawn = 0;
@@ -616,6 +617,14 @@
             }
 
             init(numPlayers) {
+                // Dynamically scale grid width based on number of players (15 columns per player)
+                GRID_WIDTH = 15 * numPlayers;
+                if (typeof resizeCanvas === 'function') resizeCanvas();
+
+                // Scale spawn rate so more players = faster spawns on the wider board
+                this.baseSpawnRate = 220;
+                this.shapeSpawnRate = Math.max(20, Math.floor(this.baseSpawnRate / numPlayers));
+
                 // Distribute players evenly across the grid
                 this.players = [];
                 for (let i = 0; i < numPlayers; i++) {
@@ -648,7 +657,9 @@
                     this.level++;
                     this.nextLevelScore = Math.floor(this.nextLevelScore * 1.6);
                     this.gameSpeed += 0.002;
-                    this.shapeSpawnRate = Math.max(100, this.shapeSpawnRate - 5);
+                    this.baseSpawnRate = Math.max(80, this.baseSpawnRate - 5);
+                    const currentPlayers = Math.max(1, players.length);
+                    this.shapeSpawnRate = Math.max(20, Math.floor(this.baseSpawnRate / currentPlayers));
                 }
 
                 // Spawn
