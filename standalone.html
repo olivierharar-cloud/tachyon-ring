@@ -20,6 +20,29 @@
             object-fit: contain;
         }
 
+        /* Enforce scaling on small laptops so the UI fits correctly on a single page */
+        @media (max-height: 800px) {
+
+            #main-menu>div,
+            #pause-menu>div,
+            #game-over>div,
+            #lobby-screen>div {
+                transform: scale(0.8);
+                transform-origin: top center;
+            }
+        }
+
+        @media (max-height: 650px) {
+
+            #main-menu>div,
+            #pause-menu>div,
+            #game-over>div,
+            #lobby-screen>div {
+                transform: scale(0.65);
+                transform-origin: top center;
+            }
+        }
+
         @keyframes blink {
 
             0%,
@@ -124,8 +147,7 @@
 
     <!-- Main Menu -->
     <div id="main-menu" class="absolute inset-0 z-20 flex flex-col items-center justify-center p-4">
-        <div
-            class="flex flex-col items-center justify-start w-full max-w-2xl h-full max-h-[90vh] overflow-y-auto space-y-8 scrollbar-hide py-4">
+        <div class="flex flex-col items-center justify-start w-full max-w-2xl space-y-8">
 
             <!-- RADICAL Title -->
             <div class="text-center space-y-6 float">
@@ -138,7 +160,7 @@
                 </div>
                 <div class="blink text-2xl text-green-400"
                     style="font-family: 'Press Start 2P', cursive; font-size: 1rem;">
-                    ★ ARCADE EDITION ★
+                    SELECT PLAYERS
                 </div>
             </div>
 
@@ -208,7 +230,7 @@
         <div id="game-over"
             class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/80 backdrop-blur-sm p-4">
             <div
-                class="flex flex-col items-center justify-start max-h-[90vh] overflow-y-auto space-y-6 bg-slate-800 p-8 rounded-2xl border border-slate-700 shadow-2xl animate-bounce-in scrollbar-hide w-full max-w-sm">
+                class="flex flex-col items-center justify-center space-y-6 bg-slate-800 p-10 rounded-2xl border border-slate-700 shadow-2xl">
                 <h2
                     class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-500">
                     GAME OVER
@@ -235,7 +257,7 @@
         <div id="pause-menu"
             class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/70 backdrop-blur-md p-4">
             <div
-                class="flex flex-col items-center justify-start max-h-[90vh] overflow-y-auto space-y-6 bg-slate-800 p-8 rounded-2xl border border-slate-700 shadow-2xl scrollbar-hide w-full max-w-sm">
+                class="flex flex-col items-center justify-center space-y-6 bg-slate-800 p-10 rounded-2xl border border-slate-700 shadow-2xl">
                 <h2
                     class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
                     PAUSE
@@ -266,131 +288,11 @@
 
         <!-- Game Canvas -->
         <div class="relative w-full h-full flex items-center justify-center z-10">
-            <canvas id="gameCanvas"
-                class="hidden border-4 border-slate-700 bg-slate-800 shadow-2xl rounded-lg"></canvas>
+            <canvas id="gameCanvas" class="hidden border-4 border-slate-700 bg-slate-800 shadow-2xl rounded-lg"
+                style="max-width: 95vw; max-height: 90vh; object-fit: contain;"></canvas>
         </div>
 
         <script>
-            // ═══════════════════════════════════════════
-            // AUDIO SYSTEM (Retro 8-bit Synthesizer)
-            // ═══════════════════════════════════════════
-            class RetroMusicPlayer {
-                constructor() {
-                    this.ctx = null;
-                    this.isPlaying = false;
-                    this.tempo = 140;
-                    this.beatLength = 60 / this.tempo;
-                    this.bassNotes = [36, 36, 36, 36, 39, 39, 41, 41];
-                    this.arpNotes = [60, 63, 67, 72, 67, 63];
-                    this.nextNoteTime = 0;
-                    this.current16thNote = 0;
-                    this.masterGain = null;
-                }
-
-                init() {
-                    if (this.ctx) return;
-                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                    this.masterGain = this.ctx.createGain();
-                    this.masterGain.gain.value = 0.5;
-                    this.masterGain.connect(this.ctx.destination);
-                }
-
-                midiToFreq(m) {
-                    return Math.pow(2, (m - 69) / 12) * 440;
-                }
-
-                scheduleNote(beatNumber, time) {
-                    if (beatNumber % 2 === 0) {
-                        const bassIdx = (beatNumber / 2) % this.bassNotes.length;
-                        const osc = this.ctx.createOscillator();
-                        const gain = this.ctx.createGain();
-                        osc.type = 'square';
-                        osc.frequency.setValueAtTime(this.midiToFreq(this.bassNotes[bassIdx]), time);
-                        gain.gain.setValueAtTime(0.5, time);
-                        gain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
-                        osc.connect(gain);
-                        gain.connect(this.masterGain);
-                        osc.start(time);
-                        osc.stop(time + 0.2);
-                    }
-
-                    const arpIdx = beatNumber % this.arpNotes.length;
-                    const leadOsc = this.ctx.createOscillator();
-                    const leadGain = this.ctx.createGain();
-                    leadOsc.type = 'sawtooth';
-                    leadOsc.frequency.setValueAtTime(this.midiToFreq(this.arpNotes[arpIdx]), time);
-                    leadGain.gain.setValueAtTime(0.15, time);
-                    leadGain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
-                    leadOsc.connect(leadGain);
-                    leadGain.connect(this.masterGain);
-                    leadOsc.start(time);
-                    leadOsc.stop(time + 0.1);
-
-                    if (beatNumber % 4 === 0) {
-                        const kickOsc = this.ctx.createOscillator();
-                        const kickGain = this.ctx.createGain();
-                        kickOsc.frequency.setValueAtTime(150, time);
-                        kickOsc.frequency.exponentialRampToValueAtTime(0.01, time + 0.1);
-                        kickGain.gain.setValueAtTime(1, time);
-                        kickGain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
-                        kickOsc.connect(kickGain);
-                        kickGain.connect(this.masterGain);
-                        kickOsc.start(time);
-                        kickOsc.stop(time + 0.1);
-                    }
-
-                    if (beatNumber % 2 !== 0) {
-                        const bufferSize = this.ctx.sampleRate * 0.1;
-                        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
-                        const data = buffer.getChannelData(0);
-                        for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-
-                        const noise = this.ctx.createBufferSource();
-                        noise.buffer = buffer;
-                        const noiseGain = this.ctx.createGain();
-
-                        const filter = this.ctx.createBiquadFilter();
-                        filter.type = beatNumber % 4 === 2 ? 'bandpass' : 'highpass';
-                        filter.frequency.value = beatNumber % 4 === 2 ? 1000 : 5000;
-
-                        noiseGain.gain.setValueAtTime(beatNumber % 4 === 2 ? 0.3 : 0.1, time);
-                        noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
-
-                        noise.connect(filter);
-                        filter.connect(noiseGain);
-                        noiseGain.connect(this.masterGain);
-                        noise.start(time);
-                    }
-                }
-
-                scheduler() {
-                    while (this.nextNoteTime < this.ctx.currentTime + 0.1) {
-                        this.scheduleNote(this.current16thNote, this.nextNoteTime);
-                        this.nextNoteTime += 0.25 * this.beatLength;
-                        this.current16thNote++;
-                        if (this.current16thNote >= 16) this.current16thNote = 0;
-                    }
-                    this.timerID = requestAnimationFrame(this.scheduler.bind(this));
-                }
-
-                play() {
-                    if (this.isPlaying) return;
-                    this.init();
-                    if (this.ctx.state === 'suspended') this.ctx.resume();
-                    this.isPlaying = true;
-                    this.current16thNote = 0;
-                    this.nextNoteTime = this.ctx.currentTime + 0.05;
-                    this.scheduler();
-                }
-
-                stop() {
-                    this.isPlaying = false;
-                    cancelAnimationFrame(this.timerID);
-                }
-            }
-
-            const audioSystem = new RetroMusicPlayer();
-
             // ═══════════════════════════════════════════
             // CONSTANTS
             // ═══════════════════════════════════════════
@@ -920,7 +822,7 @@
                     pts.forEach(p => {
                         const x = p.x * BLOCK_SIZE, y = p.y * BLOCK_SIZE;
                         const g = ctx.createLinearGradient(x, y, x + BLOCK_SIZE, y + BLOCK_SIZE);
-                        g.addColorStop(0, pal.fill); g.addColorStop(1, pal.stroke);
+                        g.addColorStop(0, pal.fill); g.addColorStop(0.5, pal.stroke);
                         ctx.fillStyle = g; ctx.fillRect(x, y, BLOCK_SIZE, BLOCK_SIZE);
                         ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fillRect(x + 2, y + 2, BLOCK_SIZE - 4, 4); ctx.fillRect(x + 2, y + 2, 4, BLOCK_SIZE - 4);
                         ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.fillRect(x + 2, y + BLOCK_SIZE - 5, BLOCK_SIZE - 4, 3); ctx.fillRect(x + BLOCK_SIZE - 5, y + 2, 3, BLOCK_SIZE - 4);
@@ -1167,16 +1069,9 @@
             // INPUT (4 PLAYERS)
             // ═══════════════════════════════════════════
 
-            // Ensure audio starts on any user click/touch (fixes autoplay policies)
-            window.addEventListener('pointerdown', () => {
-                if (typeof audioSystem !== 'undefined') audioSystem.play();
-            });
-
             window.addEventListener('keydown', (e) => {
                 if (e.code === 'Escape') { togglePause(); return; }
                 if (engine.gameOver || engine.paused) return;
-                // Play music on first keypress
-                if (typeof audioSystem !== 'undefined') audioSystem.play();
                 const actions = {
                     // P1: WASD + Space
                     'KeyA': [1, -1], 'KeyD': [1, 1], 'Space': [1, 'shoot'],
