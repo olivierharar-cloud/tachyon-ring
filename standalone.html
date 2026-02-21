@@ -964,7 +964,7 @@
             movePlayer(pid, dir) {
                 const p = this.players.find(pl => pl.id === pid); if (!p) return;
                 const nx = p.x + dir;
-                if (nx >= 0 && nx < GRID_WIDTH && !this.players.some(o => o.id !== pid && o.x === nx)) p.x = nx;
+                if (nx >= 0 && nx < GRID_WIDTH) p.x = nx;
             }
 
             shoot(pid) {
