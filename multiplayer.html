@@ -212,6 +212,119 @@
         };
 
         // === CLASSES ===
+        class AmigaTrackerPlayer {
+            constructor() {
+                this.ctx = null;
+                this.isPlaying = false;
+                this.nextNoteTime = 0;
+                this.currentStep = 0;
+                this.tempo = 125;
+                this.stepDuration = (60 / this.tempo) / 4;
+                this.schedulerTimer = null;
+            }
+
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    this.createDrumBuffers();
+                }
+                if (this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+            }
+
+            createDrumBuffers() {
+                this.snareBuffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.2, this.ctx.sampleRate);
+                const data = this.snareBuffer.getChannelData(0);
+                for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+            }
+
+            playDrum(type, time) {
+                if (type === 'kick') {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.connect(gain); gain.connect(this.ctx.destination);
+                    osc.frequency.setValueAtTime(150, time);
+                    osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.2);
+                    gain.gain.setValueAtTime(1, time);
+                    gain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+                    osc.start(time); osc.stop(time + 0.2);
+                } else if (type === 'snare') {
+                    const noise = this.ctx.createBufferSource();
+                    noise.buffer = this.snareBuffer;
+                    const filter = this.ctx.createBiquadFilter();
+                    filter.type = 'bandpass'; filter.frequency.value = 1000;
+                    const gain = this.ctx.createGain();
+                    noise.connect(filter); filter.connect(gain); gain.connect(this.ctx.destination);
+                    gain.gain.setValueAtTime(0.8, time);
+                    gain.gain.exponentialRampToValueAtTime(0.01, time + 0.15);
+                    noise.start(time); noise.stop(time + 0.15);
+                }
+            }
+
+            playSynth(freq, time, type, duration, vol) {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+                osc.type = type; osc.frequency.setValueAtTime(freq, time);
+                osc.connect(gain); gain.connect(this.ctx.destination);
+                gain.gain.setValueAtTime(0, time);
+                gain.gain.linearRampToValueAtTime(vol, time + 0.01);
+                gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
+                osc.start(time); osc.stop(time + duration);
+            }
+
+            scheduleNote() {
+                // Rock pentatonic minor (C minor)
+                const bassNotes = [65.41, 0, 77.78, 0, 65.41, 0, 98.00, 77.78, 65.41, 0, 65.41, 0, 116.54, 0, 98.00, 0];
+                const chordNotes = [0, 0, 130.81, 0, 0, 0, 155.56, 0, 0, 0, 130.81, 0, 196.00, 0, 0, 0];
+
+                const step = this.currentStep % 16;
+                const time = this.nextNoteTime;
+
+                // Drums
+                if (step === 0 || step === 8 || step === 10) this.playDrum('kick', time);
+                if (step === 4 || step === 12) this.playDrum('snare', time);
+
+                // Slap Bass
+                const bassFn = bassNotes[step];
+                if (bassFn > 0) {
+                    this.playSynth(bassFn, time, 'triangle', 0.15, 0.7);
+                    this.playSynth(bassFn, time, 'square', 0.1, 0.2);
+                }
+
+                // Staccato Chords
+                const chordFn = chordNotes[step];
+                if (chordFn > 0) {
+                    this.playSynth(chordFn, time, 'square', 0.08, 0.2);
+                    this.playSynth(chordFn * 1.5, time, 'square', 0.08, 0.15);
+                }
+            }
+
+            scheduler() {
+                while (this.nextNoteTime < this.ctx.currentTime + 0.1) {
+                    this.scheduleNote();
+                    this.nextNoteTime += this.stepDuration;
+                    this.currentStep++;
+                }
+                this.schedulerTimer = requestAnimationFrame(() => this.scheduler());
+            }
+
+            play() {
+                if (this.isPlaying) return;
+                this.init();
+                this.isPlaying = true;
+                this.currentStep = 0;
+                this.nextNoteTime = this.ctx.currentTime + 0.05;
+                this.scheduler();
+            }
+
+            stop() {
+                this.isPlaying = false;
+                if (this.schedulerTimer) cancelAnimationFrame(this.schedulerTimer);
+            }
+        }
+        const audioSystem = new AmigaTrackerPlayer();
+
         class Particle {
             constructor(x, y, color) {
                 this.x = x;
@@ -647,6 +760,7 @@
         function startMultiplayerGame() {
             document.getElementById('lobby-screen').classList.add('hidden');
             document.getElementById('game-screen').classList.remove('hidden');
+            audioSystem.play();
             engine.init(players.length);
 
             if (isHost) {
@@ -657,7 +771,10 @@
         }
 
         function gameLoop() {
-            if (engine.gameOver) return;
+            if (engine.gameOver) {
+                audioSystem.stop();
+                return;
+            }
 
             engine.update();
 
@@ -672,6 +789,9 @@
         }
 
         function guestLoop() {
+            if (engine.gameOver) {
+                audioSystem.stop();
+            }
             render();
             requestAnimationFrame(guestLoop);
         }
@@ -845,6 +965,10 @@
 
         // Input
         window.addEventListener('keydown', (e) => {
+            if (audioSystem.ctx && audioSystem.ctx.state === 'suspended') {
+                audioSystem.ctx.resume();
+            }
+
             if (e.code === 'Escape') {
                 togglePause();
                 return;
