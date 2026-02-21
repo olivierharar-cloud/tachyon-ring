@@ -21,6 +21,30 @@
                 9px 9px 0px #ffff00;
         }
 
+        @keyframes ping-slow {
+
+            75%,
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        /* Enforce scaling on small laptops so the UI fits correctly on a single page */
+        @media (max-height: 800px) {
+            #portal-container {
+                transform: scale(0.85);
+                transform-origin: top center;
+            }
+        }
+
+        @media (max-height: 650px) {
+            #portal-container {
+                transform: scale(0.65);
+                transform-origin: top center;
+            }
+        }
+
         @keyframes float {
 
             0%,
@@ -64,8 +88,8 @@
         </div>
     </div>
 
-    <!-- Main Content -->
-    <div class="relative z-10 min-h-screen flex flex-col items-center justify-center p-8">
+    <!-- Portal Container -->
+    <div id="portal-container" class="relative z-10 flex flex-col items-center justify-center min-h-screen p-4 py-12">
 
         <!-- Title -->
         <div class="float-animation mb-12">
