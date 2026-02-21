@@ -254,6 +254,126 @@
             }
         }
 
+        // ═══════════════════════════════════════════
+        // AUDIO SYSTEM (Retro 8-bit Synthesizer)
+        // ═══════════════════════════════════════════
+        class RetroMusicPlayer {
+            constructor() {
+                this.ctx = null;
+                this.isPlaying = false;
+                this.tempo = 140;
+                this.beatLength = 60 / this.tempo;
+                this.bassNotes = [36, 36, 36, 36, 39, 39, 41, 41];
+                this.arpNotes = [60, 63, 67, 72, 67, 63];
+                this.nextNoteTime = 0;
+                this.current16thNote = 0;
+                this.masterGain = null;
+            }
+
+            init() {
+                if (this.ctx) return;
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                this.masterGain = this.ctx.createGain();
+                this.masterGain.gain.value = 0.5;
+                this.masterGain.connect(this.ctx.destination);
+            }
+
+            midiToFreq(m) {
+                return Math.pow(2, (m - 69) / 12) * 440;
+            }
+
+            scheduleNote(beatNumber, time) {
+                if (beatNumber % 2 === 0) {
+                    const bassIdx = (beatNumber / 2) % this.bassNotes.length;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(this.midiToFreq(this.bassNotes[bassIdx]), time);
+                    gain.gain.setValueAtTime(0.5, time);
+                    gain.gain.exponentialRampToValueAtTime(0.01, time + 0.2);
+                    osc.connect(gain);
+                    gain.connect(this.masterGain);
+                    osc.start(time);
+                    osc.stop(time + 0.2);
+                }
+
+                const arpIdx = beatNumber % this.arpNotes.length;
+                const leadOsc = this.ctx.createOscillator();
+                const leadGain = this.ctx.createGain();
+                leadOsc.type = 'sawtooth';
+                leadOsc.frequency.setValueAtTime(this.midiToFreq(this.arpNotes[arpIdx]), time);
+                leadGain.gain.setValueAtTime(0.15, time);
+                leadGain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+                leadOsc.connect(leadGain);
+                leadGain.connect(this.masterGain);
+                leadOsc.start(time);
+                leadOsc.stop(time + 0.1);
+
+                if (beatNumber % 4 === 0) {
+                    const kickOsc = this.ctx.createOscillator();
+                    const kickGain = this.ctx.createGain();
+                    kickOsc.frequency.setValueAtTime(150, time);
+                    kickOsc.frequency.exponentialRampToValueAtTime(0.01, time + 0.1);
+                    kickGain.gain.setValueAtTime(1, time);
+                    kickGain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+                    kickOsc.connect(kickGain);
+                    kickGain.connect(this.masterGain);
+                    kickOsc.start(time);
+                    kickOsc.stop(time + 0.1);
+                }
+
+                if (beatNumber % 2 !== 0) {
+                    const bufferSize = this.ctx.sampleRate * 0.1;
+                    const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+                    const noise = this.ctx.createBufferSource();
+                    noise.buffer = buffer;
+                    const noiseGain = this.ctx.createGain();
+
+                    const filter = this.ctx.createBiquadFilter();
+                    filter.type = beatNumber % 4 === 2 ? 'bandpass' : 'highpass';
+                    filter.frequency.value = beatNumber % 4 === 2 ? 1000 : 5000;
+
+                    noiseGain.gain.setValueAtTime(beatNumber % 4 === 2 ? 0.3 : 0.1, time);
+                    noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+
+                    noise.connect(filter);
+                    filter.connect(noiseGain);
+                    noiseGain.connect(this.masterGain);
+                    noise.start(time);
+                }
+            }
+
+            scheduler() {
+                while (this.nextNoteTime < this.ctx.currentTime + 0.1) {
+                    this.scheduleNote(this.current16thNote, this.nextNoteTime);
+                    this.nextNoteTime += 0.25 * this.beatLength;
+                    this.current16thNote++;
+                    if (this.current16thNote >= 16) this.current16thNote = 0;
+                }
+                this.timerID = requestAnimationFrame(this.scheduler.bind(this));
+            }
+
+            play() {
+                if (this.isPlaying) return;
+                this.init();
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+                this.isPlaying = true;
+                this.current16thNote = 0;
+                this.nextNoteTime = this.ctx.currentTime + 0.05;
+                this.scheduler();
+            }
+
+            stop() {
+                this.isPlaying = false;
+                cancelAnimationFrame(this.timerID);
+            }
+        }
+
+        const audioSystem = new RetroMusicPlayer();
+
         // === GAME ENGINE ===
         class GameEngine {
             constructor() {
@@ -731,19 +851,41 @@
                 ctx.fillRect(b.x * BLOCK_SIZE + offset, b.y * BLOCK_SIZE + offset, size, size);
             });
 
-            // Aiming guides
+            // Ghost Aiming Block
             engine.players.forEach(p => {
-                ctx.strokeStyle = p.color;
-                ctx.globalAlpha = 0.3;
-                ctx.lineWidth = 2;
-                ctx.setLineDash([5, 5]);
-                ctx.beginPath();
-                const centerX = p.x * BLOCK_SIZE + BLOCK_SIZE / 2;
-                ctx.moveTo(centerX, (GRID_HEIGHT - 1) * BLOCK_SIZE);
-                ctx.lineTo(centerX, 0);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                ctx.globalAlpha = 1.0;
+                const th = PLAYER_THEMES[(p.id - 1) % 4];
+                const cx = p.x * BLOCK_SIZE + BLOCK_SIZE / 2;
+
+                // Ghost block (Landing preview)
+                let landingY = GRID_HEIGHT - 1;
+                for (const shape of engine.shapes) {
+                    // Check absolute points to find bottom limit
+                    const pts = typeof shape.getAbsolutePoints === 'function' ? shape.getAbsolutePoints() : [];
+                    for (const pt of pts) {
+                        if (pt.x === p.x && pt.y < landingY) {
+                            // Can't overlap, must be above it
+                            landingY = pt.y - 1;
+                        }
+                    }
+                }
+
+                // Draw ghost block
+                if (landingY >= 0) {
+                    ctx.save();
+                    ctx.globalAlpha = 0.4 + 0.3 * Math.sin(Date.now() / 150);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(p.x * BLOCK_SIZE, landingY * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(p.x * BLOCK_SIZE + 1, landingY * BLOCK_SIZE + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
+                    ctx.beginPath();
+                    ctx.moveTo(cx - 5, landingY * BLOCK_SIZE + BLOCK_SIZE / 2);
+                    ctx.lineTo(cx + 5, landingY * BLOCK_SIZE + BLOCK_SIZE / 2);
+                    ctx.moveTo(cx, landingY * BLOCK_SIZE + BLOCK_SIZE / 2 - 5);
+                    ctx.lineTo(cx, landingY * BLOCK_SIZE + BLOCK_SIZE / 2 + 5);
+                    ctx.stroke();
+                    ctx.restore();
+                }
             });
 
             // Players
@@ -787,11 +929,13 @@
 
         // Input
         window.addEventListener('keydown', (e) => {
-            // ESC for pause
             if (e.code === 'Escape') {
                 togglePause();
                 return;
             }
+
+            // Play music on first interaction
+            if (typeof audioSystem !== 'undefined') audioSystem.play();
 
             if (engine.gameOver || engine.paused) return;
 

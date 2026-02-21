@@ -818,17 +818,42 @@
                 ctx.shadowBlur = 0;
             });
 
-            // Aiming guides
-            engine.players.forEach(p => {
-                ctx.strokeStyle = p.color; ctx.globalAlpha = 0.2; ctx.lineWidth = 1; ctx.setLineDash([4, 6]); ctx.beginPath();
-                const cx = p.x * BLOCK_SIZE + BLOCK_SIZE / 2; ctx.moveTo(cx, (GRID_HEIGHT - 1) * BLOCK_SIZE); ctx.lineTo(cx, 0); ctx.stroke();
-                ctx.setLineDash([]); ctx.globalAlpha = 1;
-            });
-
             // Ships (hexagonal hull)
             engine.players.forEach(p => {
                 const th = PLAYER_THEMES[(p.id - 1) % 4];
                 const cx = p.x * BLOCK_SIZE + BLOCK_SIZE / 2;
+
+                // Ghost block (Landing preview)
+                // Find highest occupied point below the player
+                let landingY = GRID_HEIGHT - 1;
+                for (const shape of engine.shapes) {
+                    for (const pt of shape.getAbsolutePoints()) {
+                        if (pt.x === p.x && pt.y < landingY) {
+                            // Can't overlap, must be above it
+                            landingY = pt.y - 1;
+                        }
+                    }
+                }
+
+                // Draw ghost block
+                if (landingY >= 0) {
+                    ctx.save();
+                    ctx.globalAlpha = 0.4 + 0.3 * Math.sin(Date.now() / 150); // Pulse effect
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(p.x * BLOCK_SIZE, landingY * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
+                    ctx.strokeStyle = '#fff';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(p.x * BLOCK_SIZE + 1, landingY * BLOCK_SIZE + 1, BLOCK_SIZE - 2, BLOCK_SIZE - 2);
+                    // Small crosshair inside
+                    ctx.beginPath();
+                    ctx.moveTo(cx - 5, landingY * BLOCK_SIZE + BLOCK_SIZE / 2);
+                    ctx.lineTo(cx + 5, landingY * BLOCK_SIZE + BLOCK_SIZE / 2);
+                    ctx.moveTo(cx, landingY * BLOCK_SIZE + BLOCK_SIZE / 2 - 5);
+                    ctx.lineTo(cx, landingY * BLOCK_SIZE + BLOCK_SIZE / 2 + 5);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+
                 const cy = (GRID_HEIGHT - 1) * BLOCK_SIZE + BLOCK_SIZE / 2;
                 const recoilOff = p.recoil * 4;
                 ctx.save(); ctx.translate(cx, cy + recoilOff);
@@ -1009,6 +1034,8 @@
         window.addEventListener('keydown', (e) => {
             if (e.code === 'Escape') { togglePause(); return; }
             if (engine.gameOver || engine.paused) return;
+            // Play music on first keypress
+            if (typeof audioSystem !== 'undefined') audioSystem.play();
             const actions = {
                 // P1: WASD + Space
                 'KeyA': [1, -1], 'KeyD': [1, 1], 'Space': [1, 'shoot'],
