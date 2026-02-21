@@ -860,16 +860,18 @@
                 const cx = p.x * BLOCK_SIZE + BLOCK_SIZE / 2;
 
                 // Ghost block (Landing preview)
-                // Find highest occupied point below the player
-                let landingY = GRID_HEIGHT - 1;
+                // Find lowest visually (highest Y value) occupied point in the column
+                let highestShapeY = -1;
                 for (const shape of engine.shapes) {
                     for (const pt of shape.getAbsolutePoints()) {
-                        if (pt.x === p.x && pt.y < landingY) {
-                            // Can't overlap, must be above it
-                            landingY = pt.y - 1;
+                        if (pt.x === p.x && pt.y > highestShapeY) {
+                            highestShapeY = pt.y;
                         }
                     }
                 }
+
+                // The bullet attaches just below the hit block
+                let landingY = highestShapeY === -1 ? -1 : highestShapeY + 1;
 
                 // Draw ghost block
                 if (landingY >= 0) {
