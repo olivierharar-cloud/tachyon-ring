@@ -336,41 +336,33 @@
 
         // Epic messages for huge shape clears
         const EPIC_MESSAGES = {
-            20: [ // 20-29 blocks
+            30: [ // Level 1
                 '🔥 PAS MAL DU TOUT !',
                 '💪 GROS MOVE !',
                 '🎯 BIEN VISÉ !',
-                '⚡ C\'EST CHAUD LÀ !',
-                '🎰 LE RISQUE PAIE !',
                 '🌟 JOLI COUP !',
             ],
-            30: [ // 30-39 blocks
+            40: [ // Level 2
                 '🤯 ENORMISSIME !!',
                 '🚀 T\'ES COMPLÈTEMENT FOU !',
                 '💎 BIJOU DE FOLIE !!',
                 '🎪 LE CIRQUE DU RISQUE !!',
-                '🏆 GROSSES CORONÈS !!',
-                '🌋 ERUPTION TOTALE !!',
-                '🦁 C\'EST QUI LE PATRON ?!',
             ],
-            40: [ // 40-49 blocks
+            50: [ // Level 3
                 '👑 LÉGENDAIRE !!!',
                 '🌪️ OURAGAN DE TALENT !!!',
                 '💀 SUICIDE RÉUSSI !!!',
-                '🎆 FEU D\'ARTIFICE HUMAIN !!!',
-                '🏔️ SOMMET DE LA FOLIE !!!',
                 '🧨 KAMIKAZE VICTORIEUX !!!',
                 '🐉 LE DRAGON EST LÀCHÉ !!!',
             ],
-            50: [ // 50+ blocks
+            60: [ // Level 4
                 '🌌 ABSOLUMENT DÉMENTIEL !!!!',
-                '☄️ IMPACT COSMIQUE !!!!',
+                '🦁 C\'EST QUI LE PATRON ?!',
                 '🤡 ON APPELLE L\'ASILE !!!!',
-                '🏴‍☠️ PIRATE DU TACHYON !!!!',
-                '🧠 CERVEAU GALAXY SIZE !!!!',
-                '💫 TROU NOIR DE TALENT !!!!',
-                '🦸 SURHUMAIN CERTIFIÉ !!!!',
                 '🎸 ROCK\'N\'ROLL SPATIAL !!!!',
+            ],
+            70: [ // Level 5
+                '🏆 GROSSES CORONÈS !!',
             ]
         };
 
@@ -892,10 +884,11 @@
                 deadS.add(si);
                 // Epic message for big clears
                 let msgTier = 0;
-                if (area >= 50) msgTier = 50;
+                if (area >= 70) msgTier = 70;
+                else if (area >= 60) msgTier = 60;
+                else if (area >= 50) msgTier = 50;
                 else if (area >= 40) msgTier = 40;
                 else if (area >= 30) msgTier = 30;
-                else if (area >= 20) msgTier = 20;
                 if (msgTier > 0) {
                     const msgs = EPIC_MESSAGES[msgTier];
                     const text = msgs[Math.floor(Math.random() * msgs.length)];

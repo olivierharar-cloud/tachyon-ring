@@ -268,6 +268,55 @@
             ]
         };
 
+        const EPIC_MESSAGES = {
+            30: [ // Level 1
+                '🔥 PAS MAL DU TOUT !',
+                '💪 GROS MOVE !',
+                '🎯 BIEN VISÉ !',
+                '🌟 JOLI COUP !',
+                '🚨 ÇA C\'EST DU TRAVAIL D\'ÉQUIPE !',
+                '🫶 BROMANCE GALACTIQUE !',
+                '🧑‍🤝‍🧑 LA SYNERGIE EST RÉELLE !',
+                '🤝 LA COOPÉRATION PAIE ET ÇA SE VOIT !',
+            ],
+            40: [ // Level 2
+                '🤯 ENORMISSIME !!',
+                '🚀 T\'ES COMPLÈTEMENT FOU !',
+                '💎 BIJOU DE FOLIE !!',
+                '🎪 LE CIRQUE DU RISQUE !!',
+                '🤝 DIS MERCI À TES AMIS !',
+                '😅 ILS T\'ONT SAUVÉ LA MISE !',
+                '💸 TU LEUR DOIS PUREMENT UNE BIÈRE !',
+                '🧠 PARTAGE DE CERVEAU RÉUSSI !!',
+            ],
+            50: [ // Level 3
+                '👑 LÉGENDAIRE !!!',
+                '🌪️ OURAGAN DE TALENT !!!',
+                '💀 SUICIDE RÉUSSI !!!',
+                '🧨 KAMIKAZE VICTORIEUX !!!',
+                '🐉 LE DRAGON EST LÀCHÉ !!!',
+                '🔪 TU VIENS PRESQUE DE PERDRE UN AMI !',
+                '🤬 QUELQU\'UN A SUREMENT TRANSPIRÉ POUR ÇA !',
+                '🚑 RANIMATION RÉUSSIE M. LE DOCTEUR !',
+                '😤 TU POURRAS T\'EXCUSER PLUS TARD !!',
+            ],
+            60: [ // Level 4
+                '🌌 ABSOLUMENT DÉMENTIEL !!!!',
+                '🦁 C\'EST QUI LE PATRON ?!',
+                '🤡 ON APPELLE L\'ASILE !!!!',
+                '🎸 ROCK\'N\'ROLL SPATIAL !!!!',
+                '💣 ON A FRÔLÉ LE DIVORCE !!',
+                '🫂 L\'AMITIÉ A VAINCU LE CHAOS ABSOLU !!!',
+                '☠️ ILS ONT CRU QUE C\'ÉTAIT LA FIN !!!',
+                '🚑 SAUVÉS D\'UN ARRÊT CARDIAQUE COLLECTIF !!!',
+            ],
+            70: [ // Level 5
+                '🏆 GROSSES CORONÈS !!',
+                '🔮 LA DÉFINITION MÊME DU MIRACLE !!!',
+                '🙏 METTEZ-VOUS À GENOUX ET REMERCIEZ-LES !!!',
+            ]
+        };
+
         // === CLASSES ===
         class AmigaTrackerPlayer {
             constructor() {
@@ -513,6 +562,7 @@
                 this.framesSinceSpawn = 0;
                 this.gameOver = false;
                 this.paused = false;
+                this.bigMessage = null;
             }
 
             init(numPlayers) {
@@ -604,6 +654,19 @@
                                     this.score += area * area * 10 * this.level;
                                     shapesToRemove.push(sIdx);
 
+                                    let msgTier = 0;
+                                    if (area >= 70) msgTier = 70;
+                                    else if (area >= 60) msgTier = 60;
+                                    else if (area >= 50) msgTier = 50;
+                                    else if (area >= 40) msgTier = 40;
+                                    else if (area >= 30) msgTier = 30;
+                                    if (msgTier > 0) {
+                                        const msgs = EPIC_MESSAGES[msgTier];
+                                        const text = msgs[Math.floor(Math.random() * msgs.length)];
+                                        const duration = 120 + msgTier * 5;
+                                        this.bigMessage = { text, timer: duration, maxTimer: duration, area };
+                                    }
+
                                     // Particles
                                     shape.getAbsolutePoints().forEach(p => {
                                         for (let i = 0; i < 5; i++) {
@@ -625,6 +688,11 @@
                 const sSet = new Set(shapesToRemove);
                 this.bullets = this.bullets.filter((_, i) => !bSet.has(i));
                 this.shapes = this.shapes.filter((_, i) => !sSet.has(i));
+
+                if (this.bigMessage && this.bigMessage.timer > 0) {
+                    this.bigMessage.timer--;
+                    if (this.bigMessage.timer <= 0) this.bigMessage = null;
+                }
             }
 
             movePlayer(pid, dir) {
@@ -650,7 +718,8 @@
                     particles: this.particles,
                     score: this.score,
                     level: this.level,
-                    gameOver: this.gameOver
+                    gameOver: this.gameOver,
+                    bigMessage: this.bigMessage
                 };
             }
 
@@ -1045,6 +1114,42 @@
             });
 
             ctx.restore();
+
+            if (engine.bigMessage && engine.bigMessage.timer > 0) {
+                const msg = engine.bigMessage;
+                const progress = msg.timer / msg.maxTimer;
+                const alpha = progress > 0.8 ? (1 - progress) / 0.2 : (progress < 0.2 ? progress / 0.2 : 1);
+                const scale = 1 + (1 - progress) * 0.3;
+
+                const cx = panelWidth + (GRID_WIDTH * BLOCK_SIZE) / 2;
+                const cy = (GRID_HEIGHT * BLOCK_SIZE) / 2 + 40;
+
+                ctx.save();
+                ctx.globalAlpha = alpha;
+                ctx.translate(cx, cy);
+                ctx.scale(scale, scale);
+                ctx.shadowColor = 'rgba(0,0,0,0.9)';
+                ctx.shadowBlur = 20;
+
+                if (msg.area >= 50) {
+                    ctx.fillStyle = `hsl(${Date.now() / 3 % 360},100%,65%)`; // Rainbow
+                } else if (msg.area >= 40) {
+                    ctx.fillStyle = '#ff6b6b'; // Red
+                } else {
+                    ctx.fillStyle = '#fbbf24'; // Yellow
+                }
+
+                const fontSize = Math.min(36 + msg.area * 1.5, 52);
+                ctx.font = `900 ${fontSize}px VT323, monospace`;
+                ctx.textAlign = 'center';
+                ctx.fillText(msg.text, 0, 0);
+
+                ctx.font = '18px VT323, monospace';
+                ctx.fillStyle = '#fff';
+                ctx.fillText(`${msg.area} BLOCS D'UN COUP !`, 0, 30);
+
+                ctx.restore();
+            }
 
             document.getElementById('score-display').textContent = `Lvl ${engine.level} • ${engine.score}`;
         }
