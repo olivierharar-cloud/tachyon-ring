@@ -760,7 +760,7 @@
                 const p = this.players.find(pl => pl.id === pid);
                 if (!p) return;
                 const newX = p.x + dir;
-                if (newX >= 0 && newX < GRID_WIDTH) p.x = newX;
+                if (newX >= 0 && newX < GRID_WIDTH && !this.players.some(o => o.id !== pid && o.x === newX)) p.x = newX;
             }
 
             shoot(pid) {
